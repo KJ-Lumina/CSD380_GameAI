@@ -6,20 +6,17 @@ L_MoveTowardsPosition::L_MoveTowardsPosition() : targetPosition{ Vec3::Zero }
 
 void L_MoveTowardsPosition::on_enter()
 {
-    //timer = RNG::range(1.0f, 2.0f);
-
-	
+	targetPosition = agent->get_blackboard().get_value<Vec3>("TargetPosition");
 
     BehaviorNode::on_leaf_enter();
 }
 
 void L_MoveTowardsPosition::on_update(float dt)
 {
-    //timer -= dt;
-
-    agent->set_position(targetPosition);
-
-    on_success();
+	if (agent->move_toward_point(targetPosition, dt))
+	{
+		on_success();
+	}
 
     display_leaf_text();
 }

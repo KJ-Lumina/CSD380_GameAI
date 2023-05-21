@@ -22,6 +22,8 @@
 #include "Decorator/D_PossibleToTurnRight.h"
 #include "Decorator/D_IsVehicleRegistered.h"
 #include "Decorator/D_IsMovementRegistered.h"
+#include "Decorator/D_IsLocationNotPicked.h"
+#include "Decorator/D_IsRandomLocationNotPicked.h"
 
 // Example Leaf Nodes
 #include "Leaf/L_CheckMouseClick.h"
@@ -29,13 +31,13 @@
 #include "Leaf/L_MoveToFurthestAgent.h"
 #include "Leaf/L_MoveToMouseClick.h"
 #include "Leaf/L_MoveToRandomPosition.h"
-#include "Leaf/L_PlaySound.h"
 
 // Student Leaf Nodes
 #include "Leaf/L_MoveTowardsPosition.h"
 #include "Leaf/L_LookAtAgent.h"
 #include "Leaf/L_PerformMovement.h"
 #include "Leaf/L_WaitForTwoSecond.h"
+#include "Leaf/L_WaitForOneSecond.h"
 #include "Leaf/L_TurnLeft.h"
 #include "Leaf/L_TurnRight.h"
 #include "Leaf/L_IsRoadClear.h"
@@ -44,3 +46,14 @@
 #include "Leaf/L_RegisterRightTurn.h"
 #include "Leaf/L_SelectMovement.h"
 #include "Leaf/L_RegisterStraight.h"
+#include "Leaf/L_RegisterLocation.h"
+#include "Leaf/L_UnregisterLocation.h"
+#include "Leaf/L_IsThereVehicleInfront.h"
+#include "Leaf/L_LookTowardCamera.h"
+#include "Leaf/L_RegisterRandomPatchLocation.h"
+#include "Leaf/L_UnregisterRandomPatchLocation.h"
+#include "Leaf/L_AppearAboveGround.h"
+#include "Leaf/L_DigUnderground.h"
+#include "Leaf/L_Spin.h"
+#include "Leaf/L_PlaySound_Zombie.h"
+#include "Leaf/L_PlaySound_Spinny.h"

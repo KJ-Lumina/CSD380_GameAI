@@ -13,7 +13,18 @@ void D_IsVehicleRegistered::on_enter()
 void D_IsVehicleRegistered::on_update(float dt)
 {
     BehaviorNode* child = children.front();
-	bool isRegistered = std::find(GlobalInfo::vehicleAgentsID.begin(), GlobalInfo::vehicleAgentsID.end(), agent->get_id()) != GlobalInfo::vehicleAgentsID.end();
+	bool isRegistered = false;
+
+	for(const auto& behaviorAgent : GlobalInfo::vehicleAgents)
+	{
+		if (agent->get_id() == behaviorAgent->get_id())
+		{
+			isRegistered = true;
+			break;
+		}
+
+		isRegistered = false;
+	}
 
 	if (isRegistered)
 	{

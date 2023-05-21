@@ -6,16 +6,23 @@
 void ProjectOne::setup()
 {
     // Create your inital agents
-    BehaviorAgent* _agent = agents->create_behavior_agent("ExampleAgent", BehaviorTreeTypes::Car);
+    BehaviorAgent* carAgent = agents->create_behavior_agent("Car", BehaviorTreeTypes::Car);
 
-	_agent->set_position(Vec3(7.5f, 0.0f, 7.5f));
-	_agent->set_pitch(PI / 2.0f);
+    carAgent->set_position(Vec3(7.5f, 0.0f, 7.5f));
+    carAgent->set_pitch(PI / 2.0f);
 
-	/*BehaviorAgent* _agent = agents->create_behavior_agent("ExampleAgent2", BehaviorTreeTypes::Idle);
-    _agent->set_position(Vec3(7.5f, 0.0f, 7.5f));
-    _agent->set_pitch(PI / 2.0f);
-	_agent->set_yaw(PI / 2.0f);
-	std::cout << "Agent Up Vector: " << _agent->get_up_vector().x << ", " << _agent->get_up_vector().y << ", " << _agent->get_up_vector().z << std::endl;*/
+    BehaviorAgent* zombieKidAgent = agents->create_behavior_agent("ZombieKid", BehaviorTreeTypes::ZombieKid);
+
+    zombieKidAgent->set_color(Vec3(119.0f/255.0f, 120.0f/255.0f, 186.0f/255.0f)); // Purple
+    zombieKidAgent->set_scaling(Vec3(1.5f, 0.8f, 1.5f));
+    zombieKidAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
+    zombieKidAgent->get_blackboard().set_value("TargetPosition", Vec3::Zero);
+
+	BehaviorAgent* spinnyDollAgent = agents->create_behavior_agent("ZombieAdult", BehaviorTreeTypes::SpinnyDoll);
+
+    spinnyDollAgent->set_scaling(Vec3(1.5f, 1.5f, 1.5f));
+    spinnyDollAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
+    spinnyDollAgent->get_blackboard().set_value("DigLocation", Vec3::Zero);
 
     //Map Agents
     std::vector<Vec3> WallPositions{ Vec3(15.0f,0.0f,15.0f), Vec3(15.0f,0.0f,40.0f), Vec3(40.0f, 0.0f, 40.0f), Vec3(40.0f, 0.0f,15.0f)
@@ -121,6 +128,14 @@ void ProjectOne::setup()
         JunctionOrientationPassasge passage2{ Vec3(1.0f, 0.0f, 0.0f), MovementDirection::LEFT,false };
         Junction junction{ Vec3(92.5f, 0.0f, 92.5f), { passage1, passage2 } };
         GlobalInfo::junctionPoints.push_back(junction);
+    }
+
+    for(float i = 27.5f; i <= 72.5f; i += 45.0f)
+    {
+		for (float j = 27.5f; j <= 72.5f; j += 45.0f)
+		{
+			GlobalInfo::grassPatchPosition.emplace_back(Vec3(i, 0.0f, j));
+		}
     }
 
     // you can technically load any map you want, even create your own map file,

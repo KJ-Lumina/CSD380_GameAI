@@ -319,9 +319,6 @@
     <ClInclude Include="Source\Framework\Core\AudioManager.h">
       <Filter>Source\Framework\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound.h">
-      <Filter>Source\Student\Project_1\Leaf</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveTowardsPosition.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_LookAtAgent.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_IsRoadClear.h" />
@@ -340,6 +337,20 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_SelectMovement.h" />
     <ClInclude Include="Source\Student\Project_1\Decorator\D_IsMovementRegistered.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_RegisterStraight.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_IsThereVehicleInfront.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_LookTowardCamera.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_RegisterLocation.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_UnregisterLocation.h" />
+    <ClInclude Include="Source\Student\Project_1\Decorator\D_IsLocationNotPicked.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_WaitForOneSecond.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_AppearAboveGround.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_DigUnderground.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_RegisterRandomPatchLocation.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_UnregisterRandomPatchLocation.h" />
+    <ClInclude Include="Source\Student\Project_1\Decorator\D_IsRandomLocationNotPicked.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_Spin.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Spinny.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Zombie.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Framework\Main.cpp">
@@ -558,9 +569,6 @@
     <ClCompile Include="Source\Framework\Agent\EnemyAgent.cpp">
       <Filter>Source\Framework\Agent</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound.cpp">
-      <Filter>Source\Student\Project_1\Leaf</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Framework\Core\AudioManager.cpp">
       <Filter>Source\Framework\Core</Filter>
     </ClCompile>
@@ -581,6 +589,20 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_SelectMovement.cpp" />
     <ClCompile Include="Source\Student\Project_1\Decorator\D_IsMovementRegistered.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_RegisterStraight.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_IsThereVehicleInfront.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_LookTowardCamera.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_RegisterLocation.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_UnregisterLocation.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Decorator\D_IsLocationNotPicked.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_WaitForOneSecond.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_AppearAboveGround.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_DigUnderground.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_RegisterRandomPatchLocation.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_UnregisterRandomPatchLocation.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Decorator\D_IsRandomLocationNotPicked.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_Spin.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Spinny.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Zombie.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

@@ -10,7 +10,7 @@ void L_VehicleRegister::on_enter()
 	agent->set_scaling(Vec3(2.0f, 1.0f, 1.0f));
 	agent->set_position(Vec3(7.5f, 0, 7.5f));
 	agent->set_pitch(PI / 2.0f);
-	GlobalInfo::vehicleAgentsID.push_back(agent->get_id());
+	GlobalInfo::vehicleAgents.push_back(agent);
 	auto& bb = agent->get_blackboard();
 	bb.set_value("Junction Index", -1);
 	bb.set_value("PossibleTurnLeft", false);

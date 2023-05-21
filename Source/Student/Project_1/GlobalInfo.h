@@ -41,5 +41,6 @@ class GlobalInfo
 public:
 	inline static Blackboard globalBlackboard;
 	inline static std::vector<Junction> junctionPoints;
-	inline static std::vector<size_t> vehicleAgentsID;
+	inline static std::vector<BehaviorAgent*> vehicleAgents;
+	inline static std::vector<Vec3> grassPatchPosition;
 };
