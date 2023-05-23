@@ -6,24 +6,24 @@
 
 void ProjectOne::setup()
 {
- //   // Create your inital agents
- //   BehaviorAgent* carAgent = agents->create_behavior_agent("Car", BehaviorTreeTypes::Car);
+    // Create your inital agents
+    BehaviorAgent* carAgent = agents->create_behavior_agent("Car", BehaviorTreeTypes::Car);
 
- //   carAgent->set_position(Vec3(7.5f, 0.0f, 7.5f));
- //   carAgent->set_pitch(PI / 2.0f);
+    carAgent->set_position(Vec3(7.5f, 0.0f, 7.5f));
+    carAgent->set_pitch(PI / 2.0f);
 
- //   BehaviorAgent* zombieKidAgent = agents->create_behavior_agent("ZombieKid", BehaviorTreeTypes::ZombieKid);
+    BehaviorAgent* zombieKidAgent = agents->create_behavior_agent("ZombieKid", BehaviorTreeTypes::ZombieKid);
 
- //   zombieKidAgent->set_color(Vec3(119.0f/255.0f, 120.0f/255.0f, 186.0f/255.0f)); // Purple
- //   zombieKidAgent->set_scaling(Vec3(1.5f, 0.8f, 1.5f));
- //   zombieKidAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
- //   zombieKidAgent->get_blackboard().set_value("TargetPosition", Vec3::Zero);
+    zombieKidAgent->set_color(Vec3(119.0f/255.0f, 120.0f/255.0f, 186.0f/255.0f)); // Purple
+    zombieKidAgent->set_scaling(Vec3(1.5f, 0.8f, 1.5f));
+    zombieKidAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
+    zombieKidAgent->get_blackboard().set_value("TargetPosition", Vec3::Zero);
 
-	//BehaviorAgent* spinnyDollAgent = agents->create_behavior_agent("ZombieAdult", BehaviorTreeTypes::SpinnyDoll);
+	BehaviorAgent* spinnyDollAgent = agents->create_behavior_agent("ZombieAdult", BehaviorTreeTypes::SpinnyDoll);
 
- //   spinnyDollAgent->set_scaling(Vec3(1.5f, 1.5f, 1.5f));
- //   spinnyDollAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
- //   spinnyDollAgent->get_blackboard().set_value("DigLocation", Vec3::Zero);
+    spinnyDollAgent->set_scaling(Vec3(1.5f, 1.5f, 1.5f));
+    spinnyDollAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
+    spinnyDollAgent->get_blackboard().set_value("DigLocation", Vec3::Zero);
 
     int flockSize = 50;
     FlockingInfo::allBoids.reserve(flockSize);
@@ -190,10 +190,10 @@ void ProjectOne::setup()
     camera->set_position(Vec3(-62.0f, 70.0f, terrain->mapSizeInWorld * 0.5f));
     camera->set_pitch(0.610865); // 35 degrees
 
-    audioManager->SetVolume(0.5f);
-    audioManager->PlaySoundEffect(L"Assets\\Audio\\retro.wav");
+    audioManager->SetVolume(0.8f);
+    //audioManager->PlaySoundEffect(L"Assets\\Audio\\wind.wav");
     // uncomment for example on playing music in the engine (must be .wav)
-    // audioManager->PlayMusic(L"Assets\\Audio\\motivate.wav");
+     audioManager->PlayMusic(L"Assets\\Audio\\wind.wav", true);
     // audioManager->PauseMusic(...);
     // audioManager->ResumeMusic(...);
     // audioManager->StopMusic(...);

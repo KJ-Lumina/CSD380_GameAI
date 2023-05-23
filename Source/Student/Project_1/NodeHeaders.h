@@ -18,12 +18,11 @@
 
 // Student Decorator Nodes
 #include "Decorator/D_IsAtJunction.h"
-#include "Decorator/D_PossibleToTurnLeft.h"
-#include "Decorator/D_PossibleToTurnRight.h"
 #include "Decorator/D_IsVehicleRegistered.h"
 #include "Decorator/D_IsMovementRegistered.h"
 #include "Decorator/D_IsLocationNotPicked.h"
 #include "Decorator/D_IsRandomLocationNotPicked.h"
+#include "Decorator/D_IsThereBirdNeighbours.h"
 
 // Example Leaf Nodes
 #include "Leaf/L_CheckMouseClick.h"
@@ -38,8 +37,6 @@
 #include "Leaf/L_PerformMovement.h"
 #include "Leaf/L_WaitForTwoSecond.h"
 #include "Leaf/L_WaitForOneSecond.h"
-#include "Leaf/L_TurnLeft.h"
-#include "Leaf/L_TurnRight.h"
 #include "Leaf/L_IsRoadClear.h"
 #include "Leaf/L_VehicleRegister.h"
 #include "Leaf/L_RegisterLeftTurn.h"
@@ -57,8 +54,5 @@
 #include "Leaf/L_Spin.h"
 #include "Leaf/L_PlaySound_Zombie.h"
 #include "Leaf/L_PlaySound_Spinny.h"
-#include "Leaf/L_GetAllNearbyBoid.h"
-#include "Leaf/L_BoidSeparation.h"
-#include "Leaf/L_BoidAlignment.h"
-#include "Leaf/L_BoidCohesion.h"
+#include "Leaf/L_PlaySound_Gawk.h"
 #include "Leaf/L_UpdateFlock.h"

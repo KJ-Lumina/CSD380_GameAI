@@ -323,14 +323,10 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_LookAtAgent.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_IsRoadClear.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PerformMovement.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_TurnLeft.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_TurnRight.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_WaitForTwoSecond.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_VehicleRegister.h" />
     <ClInclude Include="Source\Student\Project_1\Decorator\D_IsAtJunction.h" />
     <ClInclude Include="Source\Student\Project_1\Decorator\D_IsVehicleRegistered.h" />
-    <ClInclude Include="Source\Student\Project_1\Decorator\D_PossibleToTurnLeft.h" />
-    <ClInclude Include="Source\Student\Project_1\Decorator\D_PossibleToTurnRight.h" />
     <ClInclude Include="Source\Student\Project_1\GlobalInfo.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_RegisterLeftTurn.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_RegisterRightTurn.h" />
@@ -351,12 +347,10 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_Spin.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Spinny.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Zombie.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_BoidAlignment.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_BoidCohesion.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_BoidSeparation.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_UpdateFlock.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_GetAllNearbyBoid.h" />
     <ClInclude Include="Source\Student\Project_1\FlockingInfo.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Gawk.h" />
+    <ClInclude Include="Source\Student\Project_1\Decorator\D_IsThereBirdNeighbours.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Framework\Main.cpp">
@@ -582,14 +576,10 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_LookAtAgent.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_IsRoadClear.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PerformMovement.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_TurnLeft.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_TurnRight.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_WaitForTwoSecond.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_VehicleRegister.cpp" />
     <ClCompile Include="Source\Student\Project_1\Decorator\D_IsAtJunction.cpp" />
     <ClCompile Include="Source\Student\Project_1\Decorator\D_IsVehicleRegistered.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Decorator\D_PossibleToTurnLeft.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Decorator\D_PossibleToTurnRight.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_RegisterLeftTurn.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_RegisterRightTurn.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_SelectMovement.cpp" />
@@ -609,12 +599,10 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_Spin.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Spinny.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Zombie.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_BoidAlignment.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_BoidCohesion.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_BoidSeparation.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_UpdateFlock.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_GetAllNearbyBoid.cpp" />
     <ClCompile Include="Source\Student\Project_1\FlockingInfo.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Gawk.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Decorator\D_IsThereBirdNeighbours.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

@@ -18,8 +18,8 @@ struct Boid
 	float wanderDistance = 1.0f; // The distance the wander circle is projected in front of the agent
 	Vec3 wanderTarget = Vec3(0.0f,0.0f,0.0f); // The target for the wander behavior so that we can move in the small circle
 
-	float maxSpeed{ 12.0f };
-	float maxForce{ 0.24f };
+	float maxSpeed{ 16.0f };
+	float maxForce{ 0.30f };
 };
 
 class FlockingInfo
