@@ -10,6 +10,7 @@ enum class MovementDirection
 	COUNT
 };
 
+
 struct JunctionOrientationPassasge
 {
 	Vec3 orientation { 0.0f, 0.0f, 0.0f };
@@ -39,6 +40,7 @@ struct Junction
 class GlobalInfo
 {
 public:
+
 	inline static Blackboard globalBlackboard;
 	inline static std::vector<Junction> junctionPoints;
 	inline static std::vector<BehaviorAgent*> vehicleAgents;

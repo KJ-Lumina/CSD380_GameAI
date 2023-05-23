@@ -262,10 +262,15 @@
     <ClInclude Include="Source\Student\Project_1\Decorator\D_PossibleToTurnLeft.h" />
     <ClInclude Include="Source\Student\Project_1\Decorator\D_PossibleToTurnRight.h" />
     <ClInclude Include="Source\Student\Project_1\Decorator\D_RepeatFourTimes.h" />
+    <ClInclude Include="Source\Student\Project_1\FlockingInfo.h" />
     <ClInclude Include="Source\Student\Project_1\GlobalInfo.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_AppearAboveGround.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_BoidAlignment.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_BoidCohesion.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_BoidSeparation.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_CheckMouseClick.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_DigUnderground.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_GetAllNearbyBoid.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_Idle.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_IsRoadClear.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_IsThereVehicleInfront.h" />
@@ -289,6 +294,7 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_TurnRight.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_UnregisterLocation.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_UnregisterRandomPatchLocation.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_UpdateFlock.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_VehicleRegister.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_WaitForOneSecond.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_WaitForTwoSecond.h" />
@@ -373,9 +379,14 @@
     <ClCompile Include="Source\Student\Project_1\Decorator\D_PossibleToTurnLeft.cpp" />
     <ClCompile Include="Source\Student\Project_1\Decorator\D_PossibleToTurnRight.cpp" />
     <ClCompile Include="Source\Student\Project_1\Decorator\D_RepeatFourTimes.cpp" />
+    <ClCompile Include="Source\Student\Project_1\FlockingInfo.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_AppearAboveGround.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_BoidAlignment.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_BoidCohesion.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_BoidSeparation.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_CheckMouseClick.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_DigUnderground.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_GetAllNearbyBoid.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_Idle.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_IsRoadClear.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_IsThereVehicleInfront.cpp" />
@@ -399,6 +410,7 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_TurnRight.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_UnregisterLocation.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_UnregisterRandomPatchLocation.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_UpdateFlock.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_VehicleRegister.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_WaitForOneSecond.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_WaitForTwoSecond.cpp" />

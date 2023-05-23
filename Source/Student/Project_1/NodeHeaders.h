@@ -57,3 +57,8 @@
 #include "Leaf/L_Spin.h"
 #include "Leaf/L_PlaySound_Zombie.h"
 #include "Leaf/L_PlaySound_Spinny.h"
+#include "Leaf/L_GetAllNearbyBoid.h"
+#include "Leaf/L_BoidSeparation.h"
+#include "Leaf/L_BoidAlignment.h"
+#include "Leaf/L_BoidCohesion.h"
+#include "Leaf/L_UpdateFlock.h"

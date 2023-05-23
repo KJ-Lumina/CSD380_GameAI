@@ -2,27 +2,47 @@
 #include "Projects/ProjectOne.h"
 #include "Agent/CameraAgent.h"
 #include "GlobalInfo.h"
+#include "FlockingInfo.h"
 
 void ProjectOne::setup()
 {
-    // Create your inital agents
-    BehaviorAgent* carAgent = agents->create_behavior_agent("Car", BehaviorTreeTypes::Car);
+ //   // Create your inital agents
+ //   BehaviorAgent* carAgent = agents->create_behavior_agent("Car", BehaviorTreeTypes::Car);
 
-    carAgent->set_position(Vec3(7.5f, 0.0f, 7.5f));
-    carAgent->set_pitch(PI / 2.0f);
+ //   carAgent->set_position(Vec3(7.5f, 0.0f, 7.5f));
+ //   carAgent->set_pitch(PI / 2.0f);
 
-    BehaviorAgent* zombieKidAgent = agents->create_behavior_agent("ZombieKid", BehaviorTreeTypes::ZombieKid);
+ //   BehaviorAgent* zombieKidAgent = agents->create_behavior_agent("ZombieKid", BehaviorTreeTypes::ZombieKid);
 
-    zombieKidAgent->set_color(Vec3(119.0f/255.0f, 120.0f/255.0f, 186.0f/255.0f)); // Purple
-    zombieKidAgent->set_scaling(Vec3(1.5f, 0.8f, 1.5f));
-    zombieKidAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
-    zombieKidAgent->get_blackboard().set_value("TargetPosition", Vec3::Zero);
+ //   zombieKidAgent->set_color(Vec3(119.0f/255.0f, 120.0f/255.0f, 186.0f/255.0f)); // Purple
+ //   zombieKidAgent->set_scaling(Vec3(1.5f, 0.8f, 1.5f));
+ //   zombieKidAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
+ //   zombieKidAgent->get_blackboard().set_value("TargetPosition", Vec3::Zero);
 
-	BehaviorAgent* spinnyDollAgent = agents->create_behavior_agent("ZombieAdult", BehaviorTreeTypes::SpinnyDoll);
+	//BehaviorAgent* spinnyDollAgent = agents->create_behavior_agent("ZombieAdult", BehaviorTreeTypes::SpinnyDoll);
 
-    spinnyDollAgent->set_scaling(Vec3(1.5f, 1.5f, 1.5f));
-    spinnyDollAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
-    spinnyDollAgent->get_blackboard().set_value("DigLocation", Vec3::Zero);
+ //   spinnyDollAgent->set_scaling(Vec3(1.5f, 1.5f, 1.5f));
+ //   spinnyDollAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
+ //   spinnyDollAgent->get_blackboard().set_value("DigLocation", Vec3::Zero);
+
+    int flockSize = 50;
+    FlockingInfo::allBoids.reserve(flockSize);
+
+    //Create Flock
+    for(int i = 0; i < flockSize; ++i)
+    {
+		BehaviorAgent* flockAgent = agents->create_behavior_agent("Flock", BehaviorTreeTypes::Bird_Boid);
+
+		flockAgent->set_color(Vec3(1.0f, 1.0f, 1.0f));
+        flockAgent->set_scaling(Vec3(0.25f, 0.25f, 0.25f));
+		flockAgent->set_position(Vec3(RNG::range(5.0f, 95.0f), 20.0f, RNG::range(5.0f, 95.0f)));
+		flockAgent->set_pitch(PI / 2.0f);
+
+        Boid boid{ static_cast<int>(flockAgent->get_id()), flockAgent->get_position(), Vec3(RNG::range(-1.0f, 1.0f), 0.0f, RNG::range(-1.0f, 1.0f)) };
+		boid.agent = flockAgent;
+        FlockingInfo::allBoids.emplace_back(boid);
+        flockAgent->get_blackboard().set_value("MyBoid", &(FlockingInfo::allBoids[FlockingInfo::allBoids.size() - 1]));
+	}
 
     //Map Agents
     std::vector<Vec3> WallPositions{ Vec3(15.0f,0.0f,15.0f), Vec3(15.0f,0.0f,40.0f), Vec3(40.0f, 0.0f, 40.0f), Vec3(40.0f, 0.0f,15.0f)

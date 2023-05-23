@@ -1,0 +1,4 @@
+TREENAME(Bird_Boid)
+TREENODE(C_Selector, 0)
+TREENODE(L_UpdateFlock, 1)
+TREENODE(L_Idle, 1)

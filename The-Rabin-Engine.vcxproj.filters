@@ -351,6 +351,12 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_Spin.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Spinny.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Zombie.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_BoidAlignment.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_BoidCohesion.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_BoidSeparation.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_UpdateFlock.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_GetAllNearbyBoid.h" />
+    <ClInclude Include="Source\Student\Project_1\FlockingInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Framework\Main.cpp">
@@ -603,6 +609,12 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_Spin.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Spinny.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Zombie.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_BoidAlignment.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_BoidCohesion.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_BoidSeparation.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_UpdateFlock.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_GetAllNearbyBoid.cpp" />
+    <ClCompile Include="Source\Student\Project_1\FlockingInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
