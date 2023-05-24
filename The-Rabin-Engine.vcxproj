@@ -274,6 +274,7 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveToMouseClick.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveToRandomPosition.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveTowardsPosition.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Gawk.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Spinny.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Zombie.h" />
@@ -382,6 +383,7 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MoveToMouseClick.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MoveToRandomPosition.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MoveTowardsPosition.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Gawk.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Spinny.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Zombie.cpp" />
