@@ -7,7 +7,7 @@ L_VehicleRegister::L_VehicleRegister()
 
 void L_VehicleRegister::on_enter()
 {
-	agent->set_scaling(Vec3(2.0f, 1.0f, 1.0f));
+	agent->set_scaling(Vec3(2.5f, 1.0f, 5.0f));
 	agent->set_position(Vec3(7.5f, 0, 7.5f));
 	agent->set_pitch(PI / 2.0f);
 	GlobalInfo::vehicleAgents.push_back(agent);

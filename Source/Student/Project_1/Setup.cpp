@@ -9,6 +9,7 @@ void ProjectOne::setup()
     // Create your inital agents
     BehaviorAgent* carAgent = agents->create_behavior_agent("Car", BehaviorTreeTypes::Car);
 
+    carAgent->set_color(Vec3(1.0f, 0.0f, 0.0f));
     carAgent->set_position(Vec3(7.5f, 0.0f, 7.5f));
     carAgent->set_pitch(PI / 2.0f);
 
@@ -21,6 +22,7 @@ void ProjectOne::setup()
 
 	BehaviorAgent* spinnyDollAgent = agents->create_behavior_agent("ZombieAdult", BehaviorTreeTypes::SpinnyDoll);
 
+	spinnyDollAgent->set_color(Vec3(1.0f, 0.0f, 1.0f));
     spinnyDollAgent->set_scaling(Vec3(1.5f, 1.5f, 1.5f));
     spinnyDollAgent->set_position(Vec3(27.5f, 0.0f, 27.5f));
     spinnyDollAgent->get_blackboard().set_value("DigLocation", Vec3::Zero);
@@ -190,7 +192,7 @@ void ProjectOne::setup()
     camera->set_position(Vec3(-62.0f, 70.0f, terrain->mapSizeInWorld * 0.5f));
     camera->set_pitch(0.610865); // 35 degrees
 
-    audioManager->SetVolume(0.8f);
+    audioManager->SetVolume(1.0f);
     //audioManager->PlaySoundEffect(L"Assets\\Audio\\wind.wav");
     // uncomment for example on playing music in the engine (must be .wav)
      audioManager->PlayMusic(L"Assets\\Audio\\wind.wav", true);

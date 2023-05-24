@@ -320,8 +320,6 @@
       <Filter>Source\Framework\Core</Filter>
     </ClInclude>
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveTowardsPosition.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_LookAtAgent.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_IsRoadClear.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PerformMovement.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_WaitForTwoSecond.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_VehicleRegister.h" />
@@ -573,8 +571,6 @@
       <Filter>Source\Framework\Core</Filter>
     </ClCompile>
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MoveTowardsPosition.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_LookAtAgent.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_IsRoadClear.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PerformMovement.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_WaitForTwoSecond.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_VehicleRegister.cpp" />

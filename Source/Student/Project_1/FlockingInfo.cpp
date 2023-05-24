@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "FlockingInfo.h"
 
+// Helper Functions to limit the vector by a max value
 Vec3 LimitVector(Vec3 inVector, float inMax)
 {
 	if (inVector.Length() > inMax)
@@ -11,6 +12,7 @@ Vec3 LimitVector(Vec3 inVector, float inMax)
 	return inVector;
 }
 
+// Helper Functions to calculate the seek vector
 Vec3 Seek(const Boid* myBoid, Vec3 inSeekedVector)
 {
 	Vec3 direction = inSeekedVector - myBoid->position;
@@ -29,14 +31,14 @@ Vec3 FlockingInfo::ComputeSeparation(const Boid* myBoid, const std::vector<Boid*
 	int separationCount = 0;
 	for (const auto& boid : nearbyBoids)
 	{
-		float distance = Vec3::Distance(boid->position, myBoid->position);
-		if (distance < separationRadius)
+		float distance = Vec3::Distance(boid->position, myBoid->position); //Distance between the two boids
+		if (distance < separationRadius) 
 		{
-			Vec3 direction = myBoid->position - boid->position;
-			direction.Normalize(direction);
-			direction /= distance;
-			separationResult += direction;
-			separationCount++;
+			Vec3 direction = myBoid->position - boid->position; // Direction from the other boid to this boid
+			direction.Normalize(direction); //Normalize the vector
+			direction /= distance; //Weight the vector by the distance
+			separationResult += direction; //Add the vector to the result
+			separationCount++; //Increase the count
 		}
 	}
 
@@ -47,12 +49,12 @@ Vec3 FlockingInfo::ComputeSeparation(const Boid* myBoid, const std::vector<Boid*
 	// Limit the max speed (TODO)
 	if (separationResult.Length() > 0.0f) { 
 	  separationResult.Normalize(separationResult);
-	  separationResult = separationResult * myBoid->maxSpeed;
+	  separationResult = separationResult * myBoid->maxSpeed; //Desired velocity
 	  separationResult = separationResult - myBoid->velocity; //Steering force
-	  separationResult = LimitVector(separationResult, myBoid->maxForce);
+	  separationResult = LimitVector(separationResult, myBoid->maxForce); //Limit the steering force
 	}
 
-	return separationResult * separationWeight;
+	return separationResult * separationWeight; //Return the weighted steering force
 }
 
 Vec3 FlockingInfo::ComputeAlignment(const Boid* myBoid, const std::vector<Boid*>& nearbyBoids, float alignmentWeight)
@@ -61,21 +63,21 @@ Vec3 FlockingInfo::ComputeAlignment(const Boid* myBoid, const std::vector<Boid*>
 	int alignmentCount = 0;
 	for (const auto& boid : nearbyBoids)
 	{
-		alignmentResult += boid->velocity;
-		alignmentCount++;
+		alignmentResult += boid->velocity; //Add the velocity of the other boid
+		alignmentCount++; //Increase the count
 	}
 
 	if (alignmentCount > 0) {
-
-		alignmentResult.Normalize(alignmentResult);
-		alignmentResult = alignmentResult * myBoid->maxSpeed;
-		alignmentResult = alignmentResult - myBoid->velocity;
-		alignmentResult = LimitVector(alignmentResult, myBoid->maxForce);
-		return alignmentResult * alignmentWeight;
+		alignmentResult /= static_cast<float>(alignmentCount); //Average out the vector
+		alignmentResult.Normalize(alignmentResult); //Normalize the vector
+		alignmentResult = alignmentResult * myBoid->maxSpeed; //Desired velocity
+		alignmentResult = alignmentResult - myBoid->velocity; //Steering force
+		alignmentResult = LimitVector(alignmentResult, myBoid->maxForce); //Limit the steering force
+		return alignmentResult * alignmentWeight;  //Return the weighted steering force
 	}
 	else
-	{
-		return Vec3(0.0f, 0.0f, 0.0f);
+	{ 
+		return Vec3(0.0f, 0.0f, 0.0f); // Return Zero Vector if there is no boids around it to align to
 	}
 }
 
@@ -87,19 +89,19 @@ Vec3 FlockingInfo::ComputeCohesion(const Boid* myBoid, const std::vector<Boid*>&
 	{
 		if (Vec3::Distance(boid->position, myBoid->position) < cohesionRadius)
 		{
-			cohesionResult += boid->position;
-			cohesionCount++;
+			cohesionResult += boid->position; // Add the position of the other boid
+			cohesionCount++; // Increase the count
 		}
 	}
 
 	if (cohesionCount > 0) {
 		cohesionResult /= static_cast<float>(cohesionCount); // Average out the vector
-		Vec3 steerVector = Seek(myBoid, cohesionResult);
-		return steerVector * cohesionWeight;
+		Vec3 steerVector = Seek(myBoid, cohesionResult); // Calculate the seek vector
+		return steerVector * cohesionWeight; // Return the weighted steering force
 	}
 	else
 	{
-		return Vec3{ 0.0f,0.0f,0.0f };
+		return Vec3{ 0.0f,0.0f,0.0f }; // Return Zero Vector if there is no boids around it to go towards
 	}
 }
 

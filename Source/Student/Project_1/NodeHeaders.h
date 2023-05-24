@@ -33,11 +33,9 @@
 
 // Student Leaf Nodes
 #include "Leaf/L_MoveTowardsPosition.h"
-#include "Leaf/L_LookAtAgent.h"
 #include "Leaf/L_PerformMovement.h"
 #include "Leaf/L_WaitForTwoSecond.h"
 #include "Leaf/L_WaitForOneSecond.h"
-#include "Leaf/L_IsRoadClear.h"
 #include "Leaf/L_VehicleRegister.h"
 #include "Leaf/L_RegisterLeftTurn.h"
 #include "Leaf/L_RegisterRightTurn.h"

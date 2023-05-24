@@ -267,9 +267,7 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_CheckMouseClick.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_DigUnderground.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_Idle.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_IsRoadClear.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_IsThereVehicleInfront.h" />
-    <ClInclude Include="Source\Student\Project_1\Leaf\L_LookAtAgent.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_LookTowardCamera.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PerformMovement.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveToFurthestAgent.h" />
@@ -377,9 +375,7 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_CheckMouseClick.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_DigUnderground.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_Idle.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_IsRoadClear.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_IsThereVehicleInfront.cpp" />
-    <ClCompile Include="Source\Student\Project_1\Leaf\L_LookAtAgent.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_LookTowardCamera.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PerformMovement.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MoveToFurthestAgent.cpp" />

@@ -7,9 +7,9 @@ public:
     L_UpdateFlock();
 
 protected:
-    float m_SeparationWeight = 1.5f;
+    float m_SeparationWeight = 2.0f;
 	float m_CohesionWeight = 1.0f;
-	float m_AlignmentWeight = 1.25f;
+	float m_AlignmentWeight = 1.0f;
 	float m_WanderWeight = 1.0f;
 
     float m_SeparationRadius = 10.0f;
