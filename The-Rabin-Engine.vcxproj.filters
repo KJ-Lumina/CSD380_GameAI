@@ -350,6 +350,8 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound_Gawk.h" />
     <ClInclude Include="Source\Student\Project_1\Decorator\D_IsThereBirdNeighbours.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_PlaySound.h" />
+    <ClInclude Include="Source\Student\Project_2\PathNode.h" />
+    <ClInclude Include="Source\Student\Project_2\GridInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Framework\Main.cpp">
@@ -601,6 +603,8 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound_Gawk.cpp" />
     <ClCompile Include="Source\Student\Project_1\Decorator\D_IsThereBirdNeighbours.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_PlaySound.cpp" />
+    <ClCompile Include="Source\Student\Project_2\PathNode.cpp" />
+    <ClCompile Include="Source\Student\Project_2\GridInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

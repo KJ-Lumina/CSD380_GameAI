@@ -292,6 +292,8 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_WaitForOneSecond.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_WaitForTwoSecond.h" />
     <ClInclude Include="Source\Student\Project_1\NodeHeaders.h" />
+    <ClInclude Include="Source\Student\Project_2\GridInfo.h" />
+    <ClInclude Include="Source\Student\Project_2\PathNode.h" />
     <ClInclude Include="Source\Student\Project_2\P2_Pathfinding.h" />
   </ItemGroup>
   <ItemGroup>
@@ -401,6 +403,8 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_WaitForOneSecond.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_WaitForTwoSecond.cpp" />
     <ClCompile Include="Source\Student\Project_1\Setup.cpp" />
+    <ClCompile Include="Source\Student\Project_2\GridInfo.cpp" />
+    <ClCompile Include="Source\Student\Project_2\PathNode.cpp" />
     <ClCompile Include="Source\Student\Project_2\P2_Pathfinding.cpp" />
     <ClCompile Include="Source\Student\Project_3\P3_TerrainAnalysis.cpp" />
   </ItemGroup>
