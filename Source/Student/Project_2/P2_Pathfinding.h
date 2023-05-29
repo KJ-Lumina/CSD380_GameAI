@@ -5,6 +5,8 @@
 
 constexpr int GRID_WIDTH = 40;
 constexpr int GRID_HEIGHT = 40;
+constexpr float NODE_DIAGONAL_COST = 1.41421356237f;
+constexpr float NODE_STRAIGHT_COST = 1.0f;
 
 using Grid = std::array<std::array<PathNode*, GRID_WIDTH>, GRID_HEIGHT>;
 
@@ -38,11 +40,16 @@ private:
     PathNode* _parentNode{ nullptr };
 
 	// Pathfinding Functions
-    PathNode* GetCheapestNodeInOpenLost();
+    PathNode* GetCheapestNodeInOpenList();
+    void UpdateAllNodeNeighbours();
 	void UpdateNodeAccessibleNeighbours(PathNode* inPathNode);
-	void AddNeighbourToOpenList(PathNode* inPathNode);
+	void AddAllNeighboursToOpenList(PathNode* inPathNode);
 	bool IsNodeInOpenList(PathNode* inPathNode);
 	bool IsNodeInClosedList(PathNode* inPathNode);
+    PathNode* GetNodeInOpenList(PathNode* inPathNode);
+	PathNode* GetNodeInClosedList(PathNode* inPathNode);
+	void RemoveNodeFromOpenList(PathNode* inPathNode);
+	void RemoveNodeFromClosedList(PathNode* inPathNode);
 
     // Heuristic Distance Functions
 	float manhattanDistance(const GridPos& inStart, const GridPos& inEnd);
