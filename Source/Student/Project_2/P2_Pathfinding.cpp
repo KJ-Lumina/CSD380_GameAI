@@ -193,7 +193,9 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		_goalNode = _grid[goal.row][goal.col];
 
 		//Pushing the start node onto the open list
-        _grid[start.row][start.col]->parent = nullptr;
+		PathNode& startNode = *_grid[start.row][start.col];
+        startNode.parent = nullptr;
+        startNode.isOnOpenList = true;
 		_openList.push_back(_grid[start.row][start.col]);
     }
 
@@ -214,6 +216,8 @@ PathResult AStarPather::compute_path(PathRequest &request)
             return PathResult::COMPLETE;
         }
 
+		_parentNode->isOnOpenList = false;
+		_parentNode->isOnClosedList = true;
         terrain->set_color(_parentNode->gridPosition, Colors::Yellow);
 		_closedList.push_back(_parentNode);
         AddAllNeighboursToOpenList(_parentNode);
@@ -238,7 +242,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 /*************************************************************************
  *                      Helper A* FUNCTIONS
  *************************************************************************/
-PathNode* AStarPather::GetCheapestNodeInOpenList() //TODO: Optimize using a binary tree
+PathNode* AStarPather::GetCheapestNodeInOpenList() //TODO: Optimize using a binary tree OR Priority Queue
 {
 	PathNode* cheapestNode = _openList.front();
 	int c_index = 0;
@@ -322,8 +326,8 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 			float newGivenCost = inPathNode->givenCost + NODE_STRAIGHT_COST;
 			float newFinalCost = newGivenCost + neighbour->heuristicCost;
 
-			bool isNodeInOpenList = IsNodeInOpenList(neighbour);
-			bool isNodeInClosedList = IsNodeInClosedList(neighbour);
+            bool isNodeInOpenList = neighbour->isOnOpenList;
+            bool isNodeInClosedList = neighbour->isOnClosedList;
 
 			if (!isNodeInOpenList && !isNodeInClosedList)
             {
@@ -331,6 +335,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                 neighbour->parent = inPathNode;
                 neighbour->givenCost = newGivenCost;
                 neighbour->finalCost = newFinalCost;
+                neighbour->isOnOpenList = true;
 				_openList.push_back(neighbour);
             }
 	    	else
@@ -342,11 +347,15 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                     // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
 					if (newFinalCost < node->finalCost)
 					{
+                        node->isOnOpenList = false;
+                        node->isOnClosedList = false;
 						RemoveNodeFromOpenList(node);
 						RemoveNodeFromClosedList(node);
+
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
                         neighbour->finalCost = newFinalCost;
+                        neighbour->isOnOpenList = true;
                         terrain->set_color(neighbour->gridPosition, Colors::Blue);
                         _openList.push_back(neighbour);
 					}
@@ -358,11 +367,15 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 
                     if (newFinalCost < node->finalCost)
                     {
+                        node->isOnOpenList = false;
+                        node->isOnClosedList = false;
                         RemoveNodeFromOpenList(node);
                         RemoveNodeFromClosedList(node);
+
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
                         neighbour->finalCost = newFinalCost;
+                        neighbour->isOnOpenList = true;
                         terrain->set_color(neighbour->gridPosition, Colors::Blue);
                         _openList.push_back(neighbour);
                     }
@@ -397,14 +410,15 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
             float newGivenCost = inPathNode->givenCost + NODE_DIAGONAL_COST;
             float newFinalCost = newGivenCost + neighbour->heuristicCost;
 
-            bool isNodeInOpenList = IsNodeInOpenList(neighbour);
-            bool isNodeInClosedList = IsNodeInClosedList(neighbour);
+            bool isNodeInOpenList = neighbour->isOnOpenList;
+            bool isNodeInClosedList = neighbour->isOnClosedList;
 
             if (!isNodeInOpenList && !isNodeInClosedList)
             {
                 neighbour->parent = inPathNode;
                 neighbour->givenCost = newGivenCost;
                 neighbour->finalCost = newFinalCost;
+                neighbour->isOnOpenList = true;
                 terrain->set_color(neighbour->gridPosition, Colors::Blue);
                 _openList.push_back(neighbour);
             }
@@ -417,11 +431,15 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                     // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
                     if (newFinalCost < node->finalCost)
                     {
+                        node->isOnOpenList = false;
+                        node->isOnClosedList = false;
                         RemoveNodeFromOpenList(node);
                         RemoveNodeFromClosedList(node);
+
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
                         neighbour->finalCost = newFinalCost;
+                        neighbour->isOnOpenList = true;
                         terrain->set_color(neighbour->gridPosition, Colors::Blue);
                         _openList.push_back(neighbour);
                     }
@@ -433,11 +451,15 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 
                     if (newFinalCost < node->finalCost)
                     {
+                        node->isOnOpenList = false;
+                        node->isOnClosedList = false;
                         RemoveNodeFromOpenList(node);
                         RemoveNodeFromClosedList(node);
+
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
                         neighbour->finalCost = newFinalCost;
+                        neighbour->isOnOpenList = true;
                         terrain->set_color(neighbour->gridPosition, Colors::Blue);
                         _openList.push_back(neighbour);
                     }
@@ -447,27 +469,27 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 	}
 }
 
-//Check if the node is in the open list
-bool AStarPather::IsNodeInOpenList(PathNode* inPathNode) // TODO: Optimize using a binary tree
-{
-    auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
-
-    if (it == _openList.end())
-        return false;
-
-    return true;
-}
-
-//Check if the node is in the closed list
-bool AStarPather::IsNodeInClosedList(PathNode* inPathNode) // TODO: Optimize using a binary tree
-{
-	auto it = std::find(_closedList.begin(), _closedList.end(), inPathNode);
-
-    if (it == _closedList.end())
-        return false;
-
-    return true;
-}
+////Check if the node is in the open list
+//bool AStarPather::IsNodeInOpenList(PathNode* inPathNode) // TODO: Optimize using a binary tree
+//{
+//    auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
+//
+//    if (it == _openList.end())
+//        return false;
+//
+//    return true;
+//}
+//
+////Check if the node is in the closed list
+//bool AStarPather::IsNodeInClosedList(PathNode* inPathNode) // TODO: Optimize using a binary tree
+//{
+//	auto it = std::find(_closedList.begin(), _closedList.end(), inPathNode);
+//
+//    if (it == _closedList.end())
+//        return false;
+//
+//    return true;
+//}
 
 PathNode* AStarPather::GetNodeInOpenList(PathNode* inPathNode)
 {

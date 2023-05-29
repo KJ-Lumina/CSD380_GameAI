@@ -2,6 +2,7 @@
 #include "Misc/PathfindingDetails.hpp"
 #include "PathNode.h"
 #include <vector>
+#include <queue>
 
 constexpr int GRID_WIDTH = 40;
 constexpr int GRID_HEIGHT = 40;
@@ -9,6 +10,14 @@ constexpr float NODE_DIAGONAL_COST = 1.41421356237f;
 constexpr float NODE_STRAIGHT_COST = 1.0f;
 
 using Grid = std::array<std::array<PathNode*, GRID_WIDTH>, GRID_HEIGHT>;
+
+struct PathNodeCompare
+{
+	bool operator()(const PathNode* lhs, const PathNode* rhs) const
+	{
+		return lhs->finalCost > rhs->finalCost;
+	}
+};
 
 class AStarPather
 {
@@ -33,7 +42,10 @@ public:
     */
 
 private:
+
+
     Grid _grid;
+	//std::priority_queue<PathNode*, std::vector<PathNode*>, PathNodeCompare> _openList;
 	std::vector<PathNode*> _openList; //TODO: Change to tree
 	std::vector<PathNode*> _closedList; //TODO: Change to tree
     PathNode* _goalNode{ nullptr };
@@ -50,6 +62,8 @@ private:
 	PathNode* GetNodeInClosedList(PathNode* inPathNode);
 	void RemoveNodeFromOpenList(PathNode* inPathNode);
 	void RemoveNodeFromClosedList(PathNode* inPathNode);
+
+    //Create the Path Node Compare Function
 
     void ResetGrid();
 
