@@ -121,6 +121,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 					for (int j = 0; j < terrain->get_map_height(); j++)
 					{
 						GridPos current = { i, j };
+                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
 						_grid[i][j]->heuristicCost = manhattanDistance(current, goal);
 					}
 				}
@@ -135,6 +136,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		            for (int j = 0; j < terrain->get_map_height(); j++)
 		            {
 		                GridPos current = { i, j };
+                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
 		                _grid[i][j]->heuristicCost = euclideanDistance(current, goal);
 		            }
 		        }
@@ -147,6 +149,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		            for (int j = 0; j < terrain->get_map_height(); j++)
 		            {
 		                GridPos current = { i, j };
+                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
 		                _grid[i][j]->heuristicCost = chebyshevDistance(current, goal);
 		            }
 		        }
@@ -161,6 +164,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		            for (int j = 0; j < terrain->get_map_height(); j++)
 		            {
 		                GridPos current = { i, j };
+                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
 		                _grid[i][j]->heuristicCost = octileDistance(current, goal);
 		            }
 		        }
@@ -174,6 +178,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		            for (int j = 0; j < terrain->get_map_height(); j++)
 		            {
 		                GridPos current = { i, j };
+                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
 		                _grid[i][j]->heuristicCost = inconsistentHeuristic(current, goal);
 		            }
 		        }
@@ -201,7 +206,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
             while(node != nullptr)
             {
-				request.path.push_front(terrain->get_world_position(node->gridPosition));
+                request.path.push_front(node->worldPosition);
                 node = node->parent;
             }
 
