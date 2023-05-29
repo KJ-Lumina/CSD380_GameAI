@@ -20,6 +20,15 @@ public:
 	float heuristicCost{ 0.0f };
 	float finalCost{ 0.0f };
 
+	void Reset(int x, int y)
+	{
+		parent = nullptr;
+		givenCost = 0.0f;
+		heuristicCost = 0.0f;
+		finalCost = 0.0f;
+		gridPosition = { x, y };
+	}
+
 	bool operator== (const PathNode& other) const
 	{
 		return gridPosition == other.gridPosition;

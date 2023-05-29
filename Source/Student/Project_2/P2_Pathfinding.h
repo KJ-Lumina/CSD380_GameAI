@@ -51,6 +51,8 @@ private:
 	void RemoveNodeFromOpenList(PathNode* inPathNode);
 	void RemoveNodeFromClosedList(PathNode* inPathNode);
 
+    void ResetGrid();
+
     // Heuristic Distance Functions
 	float manhattanDistance(const GridPos& inStart, const GridPos& inEnd);
 	float chebyshevDistance(const GridPos& inStart, const GridPos& inEnd);

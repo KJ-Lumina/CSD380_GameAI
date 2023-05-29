@@ -49,27 +49,25 @@ bool AStarPather::initialize()
     Callback cb = std::bind(&AStarPather::UpdateAllNodeNeighbours, this);
     Messenger::listen_for_message(Messages::MAP_CHANGE, cb);
 
-	//std::cout << "Map Width: " << terrain->get_map_width() << std::endl;
-	//std::cout << "Map Height: " << terrain->get_map_height() << std::endl;
-
-	//for (int i = 0; i < terrain->get_map_height(); i++)
-	//{
-	//	for (int j = 0; j < terrain->get_map_width(); j++)
-	//	{
- //           // Does a check to see if the neighbours and wall/in-accessible and preupdate them before pathfinding computation
-	//		UpdateNodeAccessibleNeighbours(_grid[i][j]); 
-	//	}
-	//}
-
     return true; // return false if any errors actually occur, to stop engine initialization
 }
 
 void AStarPather::shutdown()
 {
     /*
-        Free any dynamically allocated memory or any other general house-
-        keeping you need to do during shutdown.
-    */
+    Free any dynamically allocated memory or any other general house-
+    keeping you need to do during shutdown.
+	*/
+    _openList.clear();
+    _closedList.clear();
+
+    for (int i = 0; i < GRID_HEIGHT; i++)
+    {
+        for (int j = 0; j < GRID_WIDTH; j++)
+        {
+			delete _grid[i][j];
+        }
+    }
 }
 
 PathResult AStarPather::compute_path(PathRequest &request)
@@ -109,15 +107,13 @@ PathResult AStarPather::compute_path(PathRequest &request)
     // Declaring the start and goal nodes
     if (request.newRequest)
     {
+        ResetGrid();
+
 		GridPos start = terrain->get_grid_position(request.start);
 		GridPos goal = terrain->get_grid_position(request.goal);
-		// Assign the goal node
-		_goalNode = _grid[goal.row][goal.col];
-
 		// Find out which heuristic is selected and calculated it for all nodes based on terrain size
 		switch(request.settings.heuristic)
 		{
-
 			case Heuristic::MANHATTAN:
 			{
 				for (int i = 0; i < terrain->get_map_width(); i++)
@@ -185,10 +181,11 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		    }
 		}
 
-
 		//Clear the open and closed lists
 	    _openList.clear();
 	    _closedList.clear();
+
+		_goalNode = _grid[goal.row][goal.col];
 
 		//Pushing the start node onto the open list
         _grid[start.row][start.col]->parent = nullptr;
@@ -201,7 +198,6 @@ PathResult AStarPather::compute_path(PathRequest &request)
         if (_parentNode == _goalNode) {
 
             PathNode* node = _parentNode->parent;
-
 
             while(node != nullptr)
             {
@@ -224,7 +220,6 @@ PathResult AStarPather::compute_path(PathRequest &request)
     }
 
 	return PathResult::IMPOSSIBLE;
-
     
     // Just sample code, safe to delete
 
@@ -511,6 +506,20 @@ void AStarPather::RemoveNodeFromClosedList(PathNode* inPathNode)
 
     size_t index = it - _closedList.begin();
     _closedList.erase(_closedList.begin() + index);
+}
+
+void AStarPather::ResetGrid()
+{
+    for (int i = 0; i < GRID_HEIGHT; i++)
+    {
+        for (int j = 0; j < GRID_WIDTH; j++)
+        {
+            _grid[i][j]->Reset(i, j);
+
+            //_grid[i][j]->parent = nullptr;
+            //_grid[i][j]->gridPosition = { i, j };
+        }
+    }
 }
 
 /*************************************************************************
