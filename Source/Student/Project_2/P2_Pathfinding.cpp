@@ -107,7 +107,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
     // Declaring the start and goal nodes
     if (request.newRequest)
     {
-        ResetGrid();
+        ResetGrid(terrain->get_map_width(), terrain->get_map_height());
 
 		GridPos start = terrain->get_grid_position(request.start);
 		GridPos goal = terrain->get_grid_position(request.goal);
