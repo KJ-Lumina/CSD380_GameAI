@@ -112,19 +112,11 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		GridPos start = terrain->get_grid_position(request.start);
 		GridPos goal = terrain->get_grid_position(request.goal);
 
-		// Pre-Compute the world positions
-        for (int i = 0; i < terrain->get_map_width(); i++)
-        {
-            for (int j = 0; j < terrain->get_map_height(); j++)
-            {
-                _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
-            }
-        }
-
 		//Clear the open and closed lists
 	    _openList.clear();
 
         _heuristic = request.settings.heuristic; // Setting the current heuristic for this request
+		_debugColoring = request.settings.debugColoring; // Setting the current debug coloring for this request
 
 		_goalNode = _grid[goal.row][goal.col];
 
@@ -144,7 +136,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
             while(node != nullptr)
             {
-                request.path.push_front(node->worldPosition);
+                request.path.push_front(terrain->get_world_position(node->gridPosition));
                 node = node->parent;
             }
 
@@ -154,7 +146,8 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
 		_parentNode->isOnOpenList = false;
 		_parentNode->isOnClosedList = true;
-        terrain->set_color(_parentNode->gridPosition, Colors::Yellow);
+        if (_debugColoring)
+			terrain->set_color(_parentNode->gridPosition, Colors::Yellow);
 		//_closedList.push_back(_parentNode);
         AddAllNeighboursToOpenList(_parentNode);
 
@@ -223,7 +216,7 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
             bool isValid = terrain->is_valid_grid_position(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j });
 
             if (!isValid) {
-				inPathNode->neighbours[neighbourIndex] = nullptr;
+				inPathNode->neighbours[neighbourIndex] = false;
                 neighbourIndex++;
                 continue; //Skip the current node (itself
             }
@@ -232,11 +225,11 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
 			
             if(!isWall)
             {
-                inPathNode->neighbours[neighbourIndex] = _grid[inPathNode->gridPosition.row + i][inPathNode->gridPosition.col + j];
+                inPathNode->neighbours[neighbourIndex] = true;
             }
         	else
             {
-                inPathNode->neighbours[neighbourIndex] = nullptr;
+                inPathNode->neighbours[neighbourIndex] = false;
             }
 
             neighbourIndex++;
@@ -249,90 +242,45 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 {
     std::vector<int> neighboursIndex{ 1,3,4,6 };
 	std::vector<int> diagonalNeighborsIndex = { 0,2,5,7 };
-	std::vector<bool> isDiagonalNeighbourValid = { false, false, false, false };
+    std::array<bool, 8> isNeighbourValid = inPathNode->neighbours;
 
-	// Add the neighbours of the node to the open list (Top, Left, Right, Bottom)
-    for(auto index : neighboursIndex)
+    //Check if the diagonal neighbours are valid
+    if(!inPathNode->neighbours[1])
     {
-	    if(inPathNode->neighbours[index] != nullptr)
-	    {
-            PathNode* neighbour = inPathNode->neighbours[index];
-           
-            // Adding the given cost of the current node to the neighbour PLUS the straight cost
-			float newGivenCost = inPathNode->givenCost + NODE_STRAIGHT_COST;
-			float newFinalCost = newGivenCost + CalculateHeuristic(neighbour->gridPosition);
-
-            bool isNodeInOpenList = neighbour->isOnOpenList;
-            bool isNodeInClosedList = neighbour->isOnClosedList;
-
-			if (!isNodeInOpenList && !isNodeInClosedList)
-            {
-                terrain->set_color(neighbour->gridPosition, Colors::Blue);
-                neighbour->parent = inPathNode;
-                neighbour->givenCost = newGivenCost;
-                neighbour->finalCost = newFinalCost;
-                neighbour->isOnOpenList = true;
-				_openList.push_back(neighbour);
-            }
-	    	else
-			{
-				if (isNodeInOpenList) // If the node is in the open list
-                {
-                    // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
-					if (newFinalCost < neighbour->finalCost)
-					{
-                        neighbour->isOnClosedList = false;
-
-                        neighbour->parent = inPathNode;
-                        neighbour->givenCost = newGivenCost;
-                        neighbour->finalCost = newFinalCost;
-                        neighbour->isOnOpenList = true;
-                        terrain->set_color(neighbour->gridPosition, Colors::Blue);
-					}
-
-				}
-				else if (isNodeInClosedList) // If the node is in the closed list
-				{
-                    if (newFinalCost < neighbour->finalCost)
-                    {
-                        neighbour->isOnClosedList = false;
-
-                        neighbour->parent = inPathNode;
-                        neighbour->givenCost = newGivenCost;
-                        neighbour->finalCost = newFinalCost;
-                        neighbour->isOnOpenList = true;
-                        terrain->set_color(neighbour->gridPosition, Colors::Blue);
-                        _openList.push_back(neighbour);
-                    }
-				}
-			}
-	    }
+        isNeighbourValid[0] = false;
+        isNeighbourValid[2] = false;
     }
 
-	//Check if the diagonal neighbours are valid
-    if(inPathNode->neighbours[1] != nullptr && inPathNode->neighbours[3] != nullptr)
-        isDiagonalNeighbourValid[0] = true;
+    if(!inPathNode->neighbours[3])
+    {
+        isNeighbourValid[0] = false;
+        isNeighbourValid[5] = false;
+    }
 
-    if (inPathNode->neighbours[1] != nullptr && inPathNode->neighbours[4] != nullptr)
-        isDiagonalNeighbourValid[1] = true;
+    if (!inPathNode->neighbours[4])
+    {
+        isNeighbourValid[2] = false;
+        isNeighbourValid[7] = false;
+    }
 
-    if (inPathNode->neighbours[6] != nullptr && inPathNode->neighbours[3] != nullptr)
-        isDiagonalNeighbourValid[2] = true;
+    if (!inPathNode->neighbours[6])
+    {
+        isNeighbourValid[5] = false;
+        isNeighbourValid[7] = false;
+    }
 
-    if (inPathNode->neighbours[6] != nullptr && inPathNode->neighbours[4] != nullptr)
-        isDiagonalNeighbourValid[3] = true;
-
-	// Add the valid diagonal neighbours to the open list
-	for (size_t i = 0; i < isDiagonalNeighbourValid.size(); i++)
+	// Add the neighbours of the node to the open list (Top, Left, Right, Bottom)
+    
+	for(size_t index = 0; index < inPathNode->neighbours.size(); index++)
 	{
-        uint8_t index = diagonalNeighborsIndex[i];
-
-		if (isDiagonalNeighbourValid[i] && inPathNode->neighbours[index] != nullptr)
-		{
-            PathNode* neighbour = inPathNode->neighbours[index];
+        if (isNeighbourValid[index])
+        {
+            GridPos gp { inPathNode->gridPosition.row + neighbourOffsets[index].row, inPathNode->gridPosition.col + neighbourOffsets[index].col };
+            PathNode* neighbour = _grid[gp.row][gp.col];
 
             // Adding the given cost of the current node to the neighbour PLUS the straight cost
-            float newGivenCost = inPathNode->givenCost + NODE_DIAGONAL_COST;
+
+            float newGivenCost = inPathNode->givenCost + neighbourCost[index];
             float newFinalCost = newGivenCost + CalculateHeuristic(neighbour->gridPosition);
 
             bool isNodeInOpenList = neighbour->isOnOpenList;
@@ -344,8 +292,10 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                 neighbour->givenCost = newGivenCost;
                 neighbour->finalCost = newFinalCost;
                 neighbour->isOnOpenList = true;
-                terrain->set_color(neighbour->gridPosition, Colors::Blue);
                 _openList.push_back(neighbour);
+
+                if (_debugColoring)
+                    terrain->set_color(neighbour->gridPosition, Colors::Blue);
             }
             else
             {
@@ -360,8 +310,8 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                         neighbour->givenCost = newGivenCost;
                         neighbour->finalCost = newFinalCost;
                         neighbour->isOnOpenList = true;
-                        terrain->set_color(neighbour->gridPosition, Colors::Blue);
-                        _openList.push_back(neighbour);
+                        if(_debugColoring)
+                            terrain->set_color(neighbour->gridPosition, Colors::Blue);
                     }
 
                 }
@@ -375,12 +325,13 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                         neighbour->givenCost = newGivenCost;
                         neighbour->finalCost = newFinalCost;
                         neighbour->isOnOpenList = true;
-                        terrain->set_color(neighbour->gridPosition, Colors::Blue);
+                        if (_debugColoring)
+                        	terrain->set_color(neighbour->gridPosition, Colors::Blue);
                         _openList.push_back(neighbour);
                     }
                 }
             }
-		}
+        }
 	}
 }
 

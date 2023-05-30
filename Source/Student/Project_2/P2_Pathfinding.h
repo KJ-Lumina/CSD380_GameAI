@@ -9,6 +9,30 @@ constexpr int GRID_HEIGHT = 40;
 constexpr float NODE_DIAGONAL_COST = 1.41421356237f;
 constexpr float NODE_STRAIGHT_COST = 1.0f;
 
+constexpr std::array<GridPos, 8> neighbourOffsets
+{
+    GridPos{ -1, -1 },
+    GridPos{ -1, 0 },
+    GridPos{ -1, 1 },
+    GridPos{ 0, -1 },
+    GridPos{ 0, 1 },
+    GridPos{ 1, -1 },
+    GridPos{ 1, 0 },
+    GridPos{ 1, 1 }
+};
+
+constexpr std::array<float, 8> neighbourCost
+{
+    NODE_DIAGONAL_COST,
+    NODE_STRAIGHT_COST,
+    NODE_DIAGONAL_COST,
+    NODE_STRAIGHT_COST,
+    NODE_STRAIGHT_COST,
+    NODE_DIAGONAL_COST,
+    NODE_STRAIGHT_COST,
+    NODE_DIAGONAL_COST
+};
+
 using Grid = std::array<std::array<PathNode*, GRID_WIDTH>, GRID_HEIGHT>;
 
 struct PathNodeCompare
@@ -46,6 +70,7 @@ private:
 
     Grid _grid;
     Heuristic _heuristic{ Heuristic::MANHATTAN };
+    bool _debugColoring{ false };
 	//std::priority_queue<PathNode*, std::vector<PathNode*>, PathNodeCompare> _openList;
 	std::vector<PathNode*> _openList; //TODO: Change to tree
 	//std::vector<PathNode*> _closedList; //TODO: Change to tree

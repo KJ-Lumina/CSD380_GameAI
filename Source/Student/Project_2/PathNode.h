@@ -2,19 +2,13 @@
 #include <Misc/NiceTypes.h>
 #include <array>
 
-enum class NodeType
-{
-	NONE,
-	OPEN,
-	CLOSED,
-	COUNT
-};
+
+
 
 class PathNode
 {
 public:
-	Vec3 worldPosition{ 0.0f, 0.0f, 0.0f };
-	std::array<PathNode*, 8> neighbours;
+	std::array<bool, 8> neighbours;
 	PathNode* parent{ nullptr };
 	GridPos gridPosition{0, 0 };
 	float givenCost{ 0.0f };
