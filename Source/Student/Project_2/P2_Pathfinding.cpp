@@ -123,7 +123,6 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
 		//Clear the open and closed lists
 	    _openList.clear();
-	    //_closedList.clear();
 
         _heuristic = request.settings.heuristic; // Setting the current heuristic for this request
 
@@ -279,35 +278,24 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 			{
 				if (isNodeInOpenList) // If the node is in the open list
                 {
-                    //PathNode* node = GetNodeInOpenList(neighbour);
-
                     // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
 					if (newFinalCost < neighbour->finalCost)
 					{
-                        neighbour->isOnOpenList = false;
                         neighbour->isOnClosedList = false;
-						RemoveNodeFromOpenList(neighbour);
-						//RemoveNodeFromClosedList(node);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
                         neighbour->finalCost = newFinalCost;
                         neighbour->isOnOpenList = true;
                         terrain->set_color(neighbour->gridPosition, Colors::Blue);
-                        _openList.push_back(neighbour);
 					}
 
 				}
 				else if (isNodeInClosedList) // If the node is in the closed list
 				{
-                    //PathNode* node = GetNodeInClosedList(neighbour);
-
                     if (newFinalCost < neighbour->finalCost)
                     {
-                        neighbour->isOnOpenList = false;
                         neighbour->isOnClosedList = false;
-                        RemoveNodeFromOpenList(neighbour);
-                        //RemoveNodeFromClosedList(neighbour);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
@@ -363,15 +351,10 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
             {
                 if (isNodeInOpenList) // If the node is in the open list
                 {
-                    //PathNode* node = GetNodeInOpenList(neighbour);
-
                     // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
                     if (newFinalCost < neighbour->finalCost)
                     {
-                        neighbour->isOnOpenList = false;
                         neighbour->isOnClosedList = false;
-                        RemoveNodeFromOpenList(neighbour);
-                        //RemoveNodeFromClosedList(node);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
@@ -384,14 +367,9 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                 }
                 else if (isNodeInClosedList) // If the node is in the closed list
                 {
-                    //PathNode* node = GetNodeInClosedList(neighbour);
-
                     if (newFinalCost < neighbour->finalCost)
                     {
-                        neighbour->isOnOpenList = false;
                         neighbour->isOnClosedList = false;
-                        RemoveNodeFromOpenList(neighbour);
-                        //RemoveNodeFromClosedList(node);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
@@ -425,7 +403,6 @@ float AStarPather::CalculateHeuristic(GridPos inStart)
 
 		case Heuristic::CHEBYSHEV:
         {
-           // return static_cast<float>(std::max(std::abs(inStart.row - _goalNode->gridPosition.row), std::abs(inStart.col - _goalNode->gridPosition.col)));
            return std::fmax(diffX, diffY);
         }
 
@@ -476,39 +453,35 @@ float AStarPather::CalculateHeuristic(GridPos inStart)
 //    return ((inStart.row + inStart.col % 2) > 0) ? euclideanDistance(inStart, inEnd) : 0.0f;
 //}
 
+//PathNode* AStarPather::GetNodeInOpenList(PathNode* inPathNode)
+//{
+//    auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
+//
+//    if (it == _openList.end())
+//        return nullptr;
+//
+//    size_t index = it - _openList.begin();
+//    return _openList[index];
+//}
+//
+//void AStarPather::RemoveNodeFromOpenList(PathNode* inPathNode)
+//{
+//    auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
+//
+//    if (it == _openList.end())
+//        return;
+//
+//    size_t index = it - _openList.begin();
+//    _openList.erase(_openList.begin() + index);
+//}
 
-PathNode* AStarPather::GetNodeInOpenList(PathNode* inPathNode)
+void AStarPather::ResetGrid(int inWidth, int inHeight)
 {
-    auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
-
-    if (it == _openList.end())
-        return nullptr;
-
-    size_t index = it - _openList.begin();
-    return _openList[index];
-}
-
-void AStarPather::RemoveNodeFromOpenList(PathNode* inPathNode)
-{
-    auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
-
-    if (it == _openList.end())
-        return;
-
-    size_t index = it - _openList.begin();
-    _openList.erase(_openList.begin() + index);
-}
-
-void AStarPather::ResetGrid()
-{
-    for (int i = 0; i < GRID_HEIGHT; i++)
+    for (int i = 0; i < inHeight; i++)
     {
-        for (int j = 0; j < GRID_WIDTH; j++)
+        for (int j = 0; j < inWidth; j++)
         {
             _grid[i][j]->Reset(i, j);
-
-            //_grid[i][j]->parent = nullptr;
-            //_grid[i][j]->gridPosition = { i, j };
         }
     }
 }

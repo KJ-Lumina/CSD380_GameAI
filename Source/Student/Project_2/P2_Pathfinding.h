@@ -57,14 +57,10 @@ private:
     void UpdateAllNodeNeighbours();
 	void UpdateNodeAccessibleNeighbours(PathNode* inPathNode);
 	void AddAllNeighboursToOpenList(PathNode* inPathNode);
-	bool IsNodeInOpenList(PathNode* inPathNode);
-	bool IsNodeInClosedList(PathNode* inPathNode);
-    PathNode* GetNodeInOpenList(PathNode* inPathNode);
-	void RemoveNodeFromOpenList(PathNode* inPathNode);
 
     //Create the Path Node Compare Function
     float CalculateHeuristic(GridPos inStart);
-    void ResetGrid();
+    void ResetGrid(int inWidth, int inHeight);
 
     // Heuristic Distance Functions
 	float manhattanDistance(const GridPos& inStart, const GridPos& inEnd);
