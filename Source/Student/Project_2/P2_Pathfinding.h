@@ -45,9 +45,10 @@ private:
 
 
     Grid _grid;
+    Heuristic _heuristic{ Heuristic::MANHATTAN };
 	//std::priority_queue<PathNode*, std::vector<PathNode*>, PathNodeCompare> _openList;
 	std::vector<PathNode*> _openList; //TODO: Change to tree
-	std::vector<PathNode*> _closedList; //TODO: Change to tree
+	//std::vector<PathNode*> _closedList; //TODO: Change to tree
     PathNode* _goalNode{ nullptr };
     PathNode* _parentNode{ nullptr };
 
@@ -59,12 +60,10 @@ private:
 	bool IsNodeInOpenList(PathNode* inPathNode);
 	bool IsNodeInClosedList(PathNode* inPathNode);
     PathNode* GetNodeInOpenList(PathNode* inPathNode);
-	PathNode* GetNodeInClosedList(PathNode* inPathNode);
 	void RemoveNodeFromOpenList(PathNode* inPathNode);
-	void RemoveNodeFromClosedList(PathNode* inPathNode);
 
     //Create the Path Node Compare Function
-
+    float CalculateHeuristic(GridPos inStart);
     void ResetGrid();
 
     // Heuristic Distance Functions

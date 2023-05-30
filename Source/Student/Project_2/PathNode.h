@@ -18,7 +18,6 @@ public:
 	PathNode* parent{ nullptr };
 	GridPos gridPosition{0, 0 };
 	float givenCost{ 0.0f };
-	float heuristicCost{ 0.0f };
 	float finalCost{ 0.0f };
 	bool isOnOpenList{ false };
 	bool isOnClosedList{ false };
@@ -29,7 +28,6 @@ public:
 		isOnOpenList = false;
 		isOnClosedList = false;
 		givenCost = 0.0f;
-		heuristicCost = 0.0f;
 		finalCost = 0.0f;
 		gridPosition = { x, y };
 	}

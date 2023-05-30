@@ -59,7 +59,7 @@ void AStarPather::shutdown()
     keeping you need to do during shutdown.
 	*/
     _openList.clear();
-    _closedList.clear();
+    //_closedList.clear();
 
     for (int i = 0; i < GRID_HEIGHT; i++)
     {
@@ -111,84 +111,21 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
 		GridPos start = terrain->get_grid_position(request.start);
 		GridPos goal = terrain->get_grid_position(request.goal);
-		// Find out which heuristic is selected and calculated it for all nodes based on terrain size
-		switch(request.settings.heuristic)
-		{
-			case Heuristic::MANHATTAN:
-			{
-				for (int i = 0; i < terrain->get_map_width(); i++)
-				{
-					for (int j = 0; j < terrain->get_map_height(); j++)
-					{
-						GridPos current = { i, j };
-                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
-						_grid[i][j]->heuristicCost = manhattanDistance(current, goal);
-					}
-				}
-		        break;
-			}
 
-			case Heuristic::EUCLIDEAN:
-			{
-				//Euclidean
-		        for (int i = 0; i < terrain->get_map_width(); i++)
-		        {
-		            for (int j = 0; j < terrain->get_map_height(); j++)
-		            {
-		                GridPos current = { i, j };
-                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
-		                _grid[i][j]->heuristicCost = euclideanDistance(current, goal);
-		            }
-		        }
-		        break;
-			}
-			case Heuristic::CHEBYSHEV:
-			{
-		        for (int i = 0; i < terrain->get_map_width(); i++)
-		        {
-		            for (int j = 0; j < terrain->get_map_height(); j++)
-		            {
-		                GridPos current = { i, j };
-                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
-		                _grid[i][j]->heuristicCost = chebyshevDistance(current, goal);
-		            }
-		        }
-		        break;
-			}
-
-			case Heuristic::OCTILE:
-			{
-				//Octile
-		        for (int i = 0; i < terrain->get_map_width(); i++)
-		        {
-		            for (int j = 0; j < terrain->get_map_height(); j++)
-		            {
-		                GridPos current = { i, j };
-                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
-		                _grid[i][j]->heuristicCost = octileDistance(current, goal);
-		            }
-		        }
-				break;
-			}
-
-			case Heuristic::INCONSISTENT:
-		    {
-		        for (int i = 0; i < terrain->get_map_width(); i++)
-		        {
-		            for (int j = 0; j < terrain->get_map_height(); j++)
-		            {
-		                GridPos current = { i, j };
-                        _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
-		                _grid[i][j]->heuristicCost = inconsistentHeuristic(current, goal);
-		            }
-		        }
-		        break;
-		    }
-		}
+		// Pre-Compute the world positions
+        for (int i = 0; i < terrain->get_map_width(); i++)
+        {
+            for (int j = 0; j < terrain->get_map_height(); j++)
+            {
+                _grid[i][j]->worldPosition = terrain->get_world_position({ i, j });
+            }
+        }
 
 		//Clear the open and closed lists
 	    _openList.clear();
-	    _closedList.clear();
+	    //_closedList.clear();
+
+        _heuristic = request.settings.heuristic; // Setting the current heuristic for this request
 
 		_goalNode = _grid[goal.row][goal.col];
 
@@ -219,7 +156,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		_parentNode->isOnOpenList = false;
 		_parentNode->isOnClosedList = true;
         terrain->set_color(_parentNode->gridPosition, Colors::Yellow);
-		_closedList.push_back(_parentNode);
+		//_closedList.push_back(_parentNode);
         AddAllNeighboursToOpenList(_parentNode);
 
 		if (request.settings.singleStep)
@@ -324,7 +261,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
            
             // Adding the given cost of the current node to the neighbour PLUS the straight cost
 			float newGivenCost = inPathNode->givenCost + NODE_STRAIGHT_COST;
-			float newFinalCost = newGivenCost + neighbour->heuristicCost;
+			float newFinalCost = newGivenCost + CalculateHeuristic(neighbour->gridPosition);
 
             bool isNodeInOpenList = neighbour->isOnOpenList;
             bool isNodeInClosedList = neighbour->isOnClosedList;
@@ -342,15 +279,15 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 			{
 				if (isNodeInOpenList) // If the node is in the open list
                 {
-                    PathNode* node = GetNodeInOpenList(neighbour);
+                    //PathNode* node = GetNodeInOpenList(neighbour);
 
                     // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
-					if (newFinalCost < node->finalCost)
+					if (newFinalCost < neighbour->finalCost)
 					{
-                        node->isOnOpenList = false;
-                        node->isOnClosedList = false;
-						RemoveNodeFromOpenList(node);
-						RemoveNodeFromClosedList(node);
+                        neighbour->isOnOpenList = false;
+                        neighbour->isOnClosedList = false;
+						RemoveNodeFromOpenList(neighbour);
+						//RemoveNodeFromClosedList(node);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
@@ -363,14 +300,14 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 				}
 				else if (isNodeInClosedList) // If the node is in the closed list
 				{
-                    PathNode* node = GetNodeInClosedList(neighbour);
+                    //PathNode* node = GetNodeInClosedList(neighbour);
 
-                    if (newFinalCost < node->finalCost)
+                    if (newFinalCost < neighbour->finalCost)
                     {
-                        node->isOnOpenList = false;
-                        node->isOnClosedList = false;
-                        RemoveNodeFromOpenList(node);
-                        RemoveNodeFromClosedList(node);
+                        neighbour->isOnOpenList = false;
+                        neighbour->isOnClosedList = false;
+                        RemoveNodeFromOpenList(neighbour);
+                        //RemoveNodeFromClosedList(neighbour);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
@@ -408,7 +345,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 
             // Adding the given cost of the current node to the neighbour PLUS the straight cost
             float newGivenCost = inPathNode->givenCost + NODE_DIAGONAL_COST;
-            float newFinalCost = newGivenCost + neighbour->heuristicCost;
+            float newFinalCost = newGivenCost + CalculateHeuristic(neighbour->gridPosition);
 
             bool isNodeInOpenList = neighbour->isOnOpenList;
             bool isNodeInClosedList = neighbour->isOnClosedList;
@@ -426,15 +363,15 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
             {
                 if (isNodeInOpenList) // If the node is in the open list
                 {
-                    PathNode* node = GetNodeInOpenList(neighbour);
+                    //PathNode* node = GetNodeInOpenList(neighbour);
 
                     // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
-                    if (newFinalCost < node->finalCost)
+                    if (newFinalCost < neighbour->finalCost)
                     {
-                        node->isOnOpenList = false;
-                        node->isOnClosedList = false;
-                        RemoveNodeFromOpenList(node);
-                        RemoveNodeFromClosedList(node);
+                        neighbour->isOnOpenList = false;
+                        neighbour->isOnClosedList = false;
+                        RemoveNodeFromOpenList(neighbour);
+                        //RemoveNodeFromClosedList(node);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
@@ -447,14 +384,14 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                 }
                 else if (isNodeInClosedList) // If the node is in the closed list
                 {
-                    PathNode* node = GetNodeInClosedList(neighbour);
+                    //PathNode* node = GetNodeInClosedList(neighbour);
 
-                    if (newFinalCost < node->finalCost)
+                    if (newFinalCost < neighbour->finalCost)
                     {
-                        node->isOnOpenList = false;
-                        node->isOnClosedList = false;
-                        RemoveNodeFromOpenList(node);
-                        RemoveNodeFromClosedList(node);
+                        neighbour->isOnOpenList = false;
+                        neighbour->isOnClosedList = false;
+                        RemoveNodeFromOpenList(neighbour);
+                        //RemoveNodeFromClosedList(node);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
@@ -469,27 +406,76 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 	}
 }
 
-////Check if the node is in the open list
-//bool AStarPather::IsNodeInOpenList(PathNode* inPathNode) // TODO: Optimize using a binary tree
+float AStarPather::CalculateHeuristic(GridPos inStart)
+{
+    float diffX = std::fabsf(static_cast<float>(inStart.row - _goalNode->gridPosition.row));
+    float diffY = std::fabsf(static_cast<float>(inStart.col - _goalNode->gridPosition.col));
+
+	switch(_heuristic)
+	{
+		case Heuristic::MANHATTAN:
+		{
+            return diffX + diffY;
+		}
+
+		case Heuristic::EUCLIDEAN:
+        {
+            return std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2));
+        }
+
+		case Heuristic::CHEBYSHEV:
+        {
+           // return static_cast<float>(std::max(std::abs(inStart.row - _goalNode->gridPosition.row), std::abs(inStart.col - _goalNode->gridPosition.col)));
+           return std::fmax(diffX, diffY);
+        }
+
+		case Heuristic::OCTILE:
+        {
+            return std::fmin(diffX, diffY) * std::sqrtf(2) + std::fmax(diffX, diffY) - std::fmin(diffX, diffY);
+        }
+
+		case Heuristic::INCONSISTENT:
+        {
+            return ((inStart.row + inStart.col % 2) > 0) ? std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2)) : 0.0f;
+        }
+	}
+
+    return 0.0f;
+}
+
+
+/*************************************************************************
+ *                      HEURISTIC FUNCTIONS
+ *************************************************************************/
+//float AStarPather::manhattanDistance(const GridPos& inStart, const GridPos& inEnd)
 //{
-//    auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
-//
-//    if (it == _openList.end())
-//        return false;
-//
-//    return true;
+//    return static_cast<float>(std::abs(inStart.row - inEnd.row) + std::abs(inStart.col - inEnd.col));
 //}
 //
-////Check if the node is in the closed list
-//bool AStarPather::IsNodeInClosedList(PathNode* inPathNode) // TODO: Optimize using a binary tree
+//float AStarPather::chebyshevDistance(const GridPos& inStart, const GridPos& inEnd)
 //{
-//	auto it = std::find(_closedList.begin(), _closedList.end(), inPathNode);
-//
-//    if (it == _closedList.end())
-//        return false;
-//
-//    return true;
+//    return static_cast<float>(std::max(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col)));
 //}
+//
+//float AStarPather::euclideanDistance(const GridPos& inStart, const GridPos& inEnd)
+//{
+//    return static_cast<float>(std::sqrt(std::pow(inStart.row - inEnd.row, 2) + static_cast<double>(std::pow(inStart.col - inEnd.col, 2))));
+//}
+//
+//float AStarPather::octileDistance(const GridPos& inStart, const GridPos& inEnd)
+//{
+//    const float a = static_cast<float>(std::fmin(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col))) * static_cast<float>(std::sqrt(2));
+//    const float b = static_cast<float>(std::fmax(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col)));
+//    const float c = static_cast<float>(std::fmin(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col)));
+//
+//    return a + b - c;
+//}
+//
+//float AStarPather::inconsistentHeuristic(const GridPos& inStart, const GridPos& inEnd)
+//{
+//    return ((inStart.row + inStart.col % 2) > 0) ? euclideanDistance(inStart, inEnd) : 0.0f;
+//}
+
 
 PathNode* AStarPather::GetNodeInOpenList(PathNode* inPathNode)
 {
@@ -502,17 +488,6 @@ PathNode* AStarPather::GetNodeInOpenList(PathNode* inPathNode)
     return _openList[index];
 }
 
-PathNode* AStarPather::GetNodeInClosedList(PathNode* inPathNode)
-{
-    auto it = std::find(_closedList.begin(), _closedList.end(), inPathNode);
-
-    if (it == _closedList.end())
-        return nullptr;
-
-    size_t index = it - _closedList.begin();
-    return _closedList[index];
-}
-
 void AStarPather::RemoveNodeFromOpenList(PathNode* inPathNode)
 {
     auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
@@ -522,17 +497,6 @@ void AStarPather::RemoveNodeFromOpenList(PathNode* inPathNode)
 
     size_t index = it - _openList.begin();
     _openList.erase(_openList.begin() + index);
-}
-
-void AStarPather::RemoveNodeFromClosedList(PathNode* inPathNode)
-{
-    auto it = std::find(_closedList.begin(), _closedList.end(), inPathNode);
-
-    if (it == _closedList.end())
-        return;
-
-    size_t index = it - _closedList.begin();
-    _closedList.erase(_closedList.begin() + index);
 }
 
 void AStarPather::ResetGrid()
@@ -547,36 +511,4 @@ void AStarPather::ResetGrid()
             //_grid[i][j]->gridPosition = { i, j };
         }
     }
-}
-
-/*************************************************************************
- *                      HEURISTIC FUNCTIONS
- *************************************************************************/
-float AStarPather::manhattanDistance(const GridPos& inStart, const GridPos& inEnd)
-{
-    return static_cast<float>(std::abs(inStart.row - inEnd.row) + std::abs(inStart.col - inEnd.col));
-}
-
-float AStarPather::chebyshevDistance(const GridPos& inStart, const GridPos& inEnd)
-{
-    return static_cast<float>(std::max(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col)));
-}
-
-float AStarPather::euclideanDistance(const GridPos& inStart, const GridPos& inEnd)
-{
-    return static_cast<float>(std::sqrt(std::pow(inStart.row - inEnd.row, 2) + static_cast<double>(std::pow(inStart.col - inEnd.col, 2))));
-}
-
-float AStarPather::octileDistance(const GridPos& inStart, const GridPos& inEnd)
-{
-    const float a = static_cast<float>(std::fmin(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col))) * static_cast<float>(std::sqrt(2));
-    const float b = static_cast<float>(std::fmax(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col)));
-	const float c = static_cast<float>(std::fmin(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col)));
-
-	return a + b - c;
-}
-
-float AStarPather::inconsistentHeuristic(const GridPos& inStart, const GridPos& inEnd)
-{
-    return ((inStart.row + inStart.col % 2) > 0) ? euclideanDistance(inStart, inEnd) : 0.0f;
 }
