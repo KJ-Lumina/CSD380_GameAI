@@ -171,6 +171,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\Source\Framework;$(ProjectDir)\Include;$(ProjectDir)\Source\Framework\BehaviorTrees</AdditionalIncludeDirectories>
       <StringPooling>true</StringPooling>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

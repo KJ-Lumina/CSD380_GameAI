@@ -117,6 +117,8 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
         _heuristic = request.settings.heuristic; // Setting the current heuristic for this request
 		_debugColoring = request.settings.debugColoring; // Setting the current debug coloring for this request
+		_weight = request.settings.weight; // Setting the current weight for this request
+		_singleStep = request.settings.singleStep; // Setting the current single step for this request
 
 		_goalNode = _grid[goal.row][goal.col];
 
@@ -136,11 +138,11 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
             while(node != nullptr)
             {
-                request.path.push_front(terrain->get_world_position(node->gridPosition));
+                request.path.emplace_front(terrain->get_world_position(node->gridPosition));
                 node = node->parent;
             }
 
-            request.path.push_back(request.goal);
+            request.path.emplace_back(request.goal);
             return PathResult::COMPLETE;
         }
 
@@ -148,24 +150,16 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		_parentNode->isOnClosedList = true;
         if (_debugColoring)
 			terrain->set_color(_parentNode->gridPosition, Colors::Yellow);
-		//_closedList.push_back(_parentNode);
+
         AddAllNeighboursToOpenList(_parentNode);
 
-		if (request.settings.singleStep)
+		if (_singleStep)
 		{
 			return PathResult::PROCESSING;
 		}
     }
 
 	return PathResult::IMPOSSIBLE;
-    
-    // Just sample code, safe to delete
-
-    //terrain->set_color(start, Colors::Orange);
-    //terrain->set_color(goal, Colors::Orange);
-    //request.path.push_back(request.start);
-    //request.path.push_back(request.goal);
-    //return PathResult::COMPLETE;
 }
 
 /*************************************************************************
@@ -173,6 +167,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
  *************************************************************************/
 PathNode* AStarPather::GetCheapestNodeInOpenList() //TODO: Optimize using a binary tree OR Priority Queue
 {
+    // Sort the open list the final cost, cheapest node at the back of the vector
 	PathNode* cheapestNode = _openList.front();
 	int c_index = 0;
 
@@ -281,7 +276,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
             // Adding the given cost of the current node to the neighbour PLUS the straight cost
 
             float newGivenCost = inPathNode->givenCost + neighbourCost[index];
-            float newFinalCost = newGivenCost + CalculateHeuristic(neighbour->gridPosition);
+            float newFinalCost = newGivenCost + (CalculateHeuristic(neighbour->gridPosition) * _weight);
 
             bool isNodeInOpenList = neighbour->isOnOpenList;
             bool isNodeInClosedList = neighbour->isOnClosedList;

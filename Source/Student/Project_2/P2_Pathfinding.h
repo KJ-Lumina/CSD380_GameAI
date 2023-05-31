@@ -71,9 +71,10 @@ private:
     Grid _grid;
     Heuristic _heuristic{ Heuristic::MANHATTAN };
     bool _debugColoring{ false };
-	//std::priority_queue<PathNode*, std::vector<PathNode*>, PathNodeCompare> _openList;
+	float _weight = 1.0f;
+	bool _singleStep = false;
+
 	std::vector<PathNode*> _openList; //TODO: Change to tree
-	//std::vector<PathNode*> _closedList; //TODO: Change to tree
     PathNode* _goalNode{ nullptr };
     PathNode* _parentNode{ nullptr };
 
