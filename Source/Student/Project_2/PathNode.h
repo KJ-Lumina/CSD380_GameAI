@@ -3,8 +3,6 @@
 #include <array>
 #include <bitset>
 
-
-
 class PathNode
 {
 public:

@@ -76,7 +76,7 @@ private:
     Heuristic _heuristic{ Heuristic::MANHATTAN };
     float _weight = 1.0f;
     bool _debugColoring{ false };
-	bool _singleStep = false;
+    bool _singleStep{ false };
 
 	// Pathfinding Functions
     void UpdateAllNodeNeighbours();
@@ -84,6 +84,6 @@ private:
 	void AddAllNeighboursToOpenList(PathNode* inPathNode);
 
     //Create the Path Node Compare Function
-    float CalculateHeuristic(GridPos& inStart);
+    float CalculateHeuristic(const GridPos& inStart);
     void ResetGrid(int inWidth, int inHeight);
 };

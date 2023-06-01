@@ -127,7 +127,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
         if (_parentNode == _goalNode) {
 
-            PathNode* node = _parentNode->parent;
+            const PathNode* node = _parentNode->parent;
 
             while(node != nullptr)
             {
@@ -293,7 +293,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 	}
 }
 
-float AStarPather::CalculateHeuristic(GridPos& inStart)
+float AStarPather::CalculateHeuristic(const GridPos& inStart)
 {
     const float diffX = std::fabsf(static_cast<float>(inStart.row - _goalNode->gridPosition.row));
     const float diffY = std::fabsf(static_cast<float>(inStart.col - _goalNode->gridPosition.col));
@@ -324,9 +324,10 @@ float AStarPather::CalculateHeuristic(GridPos& inStart)
         {
             return ((inStart.row + inStart.col % 2) > 0) ? std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2)) : 0.0f;
         }
-	}
 
-    return 0.0f;
+		default:
+	        return 0.0f;
+	}
 }
 
 void AStarPather::ResetGrid(const int inWidth, const int inHeight)
