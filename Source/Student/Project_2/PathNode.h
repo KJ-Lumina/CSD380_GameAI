@@ -1,7 +1,7 @@
 #pragma once
 #include <Misc/NiceTypes.h>
 #include <array>
-
+#include <bitset>
 
 
 
@@ -13,23 +13,43 @@ public:
 	GridPos gridPosition{0, 0 };
 	float givenCost{ 0.0f };
 	float finalCost{ 0.0f };
-	bool isOnOpenList{ false };
-	bool isOnClosedList{ false };
+	std::bitset<2> nodeStates;
 
 	void Reset(int x, int y)
 	{
 		parent = nullptr;
-		isOnOpenList = false;
-		isOnClosedList = false;
+		nodeStates.reset();
 		givenCost = 0.0f;
 		finalCost = 0.0f;
 		gridPosition = { x, y };
+	}
+
+	void SetOpenList(bool value)
+	{
+		nodeStates.set(0, value);
+	}
+
+	void SetClosedList(bool value)
+	{
+		nodeStates.set(1, value);
+	}
+
+	bool IsOnOpenList() const
+	{
+		return nodeStates.test(0);
+	}
+
+	bool IsOnClosedList() const
+	{
+		return nodeStates.test(1);
 	}
 
 	bool operator== (const PathNode& other) const
 	{
 		return gridPosition == other.gridPosition;
 	}
+
+
 
 private:
 };

@@ -125,8 +125,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		//Pushing the start node onto the open list
 		PathNode& startNode = *_grid[start.row][start.col];
         startNode.parent = nullptr;
-        startNode.isOnOpenList = true;
-
+        startNode.SetOpenList(true);
 		_openList.push_back(_grid[start.row][start.col]);
         std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
     }
@@ -148,8 +147,8 @@ PathResult AStarPather::compute_path(PathRequest &request)
             return PathResult::COMPLETE;
         }
 
-		_parentNode->isOnOpenList = false;
-		_parentNode->isOnClosedList = true;
+        _parentNode->SetOpenList(false);
+		_parentNode->SetClosedList(true);
         if (_debugColoring)
 			terrain->set_color(_parentNode->gridPosition, Colors::Yellow);
 
@@ -267,15 +266,15 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
             float newGivenCost = inPathNode->givenCost + neighbourCost[index];
             float newFinalCost = newGivenCost + (CalculateHeuristic(neighbour->gridPosition) * _weight);
 
-            bool isNodeInOpenList = neighbour->isOnOpenList;
-            bool isNodeInClosedList = neighbour->isOnClosedList;
+            bool isNodeInOpenList = neighbour->IsOnOpenList();
+            bool isNodeInClosedList = neighbour->IsOnClosedList();
 
             if (!isNodeInOpenList && !isNodeInClosedList)
             {
                 neighbour->parent = inPathNode;
                 neighbour->givenCost = newGivenCost;
                 neighbour->finalCost = newFinalCost;
-                neighbour->isOnOpenList = true;
+                neighbour->SetOpenList(true);
 
                 _openList.push_back(neighbour);
                 std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
@@ -290,12 +289,12 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                     // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
                     if (newFinalCost < neighbour->finalCost)
                     {
-                        neighbour->isOnClosedList = false;
+                        neighbour->SetClosedList(false);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
                         neighbour->finalCost = newFinalCost;
-                        neighbour->isOnOpenList = true;
+                        neighbour->SetOpenList(true);
 
                         std::make_heap(_openList.begin(), _openList.end(), PathNodeCompare());
 
@@ -308,12 +307,12 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                 {
                     if (newFinalCost < neighbour->finalCost)
                     {
-                        neighbour->isOnClosedList = false;
+                        neighbour->SetClosedList(false);
 
                         neighbour->parent = inPathNode;
                         neighbour->givenCost = newGivenCost;
                         neighbour->finalCost = newFinalCost;
-                        neighbour->isOnOpenList = true;
+                        neighbour->SetOpenList(true);
                         if (_debugColoring)
                         	terrain->set_color(neighbour->gridPosition, Colors::Blue);
                         _openList.push_back(neighbour);
