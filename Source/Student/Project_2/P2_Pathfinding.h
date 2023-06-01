@@ -87,12 +87,4 @@ private:
     //Create the Path Node Compare Function
     float CalculateHeuristic(GridPos inStart);
     void ResetGrid(int inWidth, int inHeight);
-
-    // Heuristic Distance Functions
-	float manhattanDistance(const GridPos& inStart, const GridPos& inEnd);
-	float chebyshevDistance(const GridPos& inStart, const GridPos& inEnd);
-	float euclideanDistance(const GridPos& inStart, const GridPos& inEnd);
-	float octileDistance(const GridPos& inStart, const GridPos& inEnd);
-	float inconsistentHeuristic(const GridPos& inStart, const GridPos& inEnd);
-
 };

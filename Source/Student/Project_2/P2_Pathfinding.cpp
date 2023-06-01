@@ -226,8 +226,6 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
 //Add the neighbours of the node to the open list
 void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 {
-    std::vector<int> neighboursIndex{ 1,3,4,6 };
-	std::vector<int> diagonalNeighborsIndex = { 0,2,5,7 };
     std::array<bool, 8> isNeighbourValid = inPathNode->neighbours;
 
     //Check if the diagonal neighbours are valid
@@ -362,61 +360,6 @@ float AStarPather::CalculateHeuristic(GridPos inStart)
 
     return 0.0f;
 }
-
-
-/*************************************************************************
- *                      HEURISTIC FUNCTIONS
- *************************************************************************/
-//float AStarPather::manhattanDistance(const GridPos& inStart, const GridPos& inEnd)
-//{
-//    return static_cast<float>(std::abs(inStart.row - inEnd.row) + std::abs(inStart.col - inEnd.col));
-//}
-//
-//float AStarPather::chebyshevDistance(const GridPos& inStart, const GridPos& inEnd)
-//{
-//    return static_cast<float>(std::max(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col)));
-//}
-//
-//float AStarPather::euclideanDistance(const GridPos& inStart, const GridPos& inEnd)
-//{
-//    return static_cast<float>(std::sqrt(std::pow(inStart.row - inEnd.row, 2) + static_cast<double>(std::pow(inStart.col - inEnd.col, 2))));
-//}
-//
-//float AStarPather::octileDistance(const GridPos& inStart, const GridPos& inEnd)
-//{
-//    const float a = static_cast<float>(std::fmin(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col))) * static_cast<float>(std::sqrt(2));
-//    const float b = static_cast<float>(std::fmax(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col)));
-//    const float c = static_cast<float>(std::fmin(std::abs(inStart.row - inEnd.row), std::abs(inStart.col - inEnd.col)));
-//
-//    return a + b - c;
-//}
-//
-//float AStarPather::inconsistentHeuristic(const GridPos& inStart, const GridPos& inEnd)
-//{
-//    return ((inStart.row + inStart.col % 2) > 0) ? euclideanDistance(inStart, inEnd) : 0.0f;
-//}
-
-//PathNode* AStarPather::GetNodeInOpenList(PathNode* inPathNode)
-//{
-//    auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
-//
-//    if (it == _openList.end())
-//        return nullptr;
-//
-//    size_t index = it - _openList.begin();
-//    return _openList[index];
-//}
-//
-//void AStarPather::RemoveNodeFromOpenList(PathNode* inPathNode)
-//{
-//    auto it = std::find(_openList.begin(), _openList.end(), inPathNode);
-//
-//    if (it == _openList.end())
-//        return;
-//
-//    size_t index = it - _openList.begin();
-//    _openList.erase(_openList.begin() + index);
-//}
 
 void AStarPather::ResetGrid(int inWidth, int inHeight)
 {
