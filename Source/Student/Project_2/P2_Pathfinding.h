@@ -6,7 +6,8 @@
 
 constexpr int GRID_WIDTH = 40;
 constexpr int GRID_HEIGHT = 40;
-constexpr float NODE_DIAGONAL_COST = 1.41421356237f;
+constexpr float SQRT_2 = 1.41421356237f;
+constexpr float NODE_DIAGONAL_COST = SQRT_2;
 constexpr float NODE_STRAIGHT_COST = 1.0f;
 
 constexpr std::array<GridPos, 8> neighbourOffsets
@@ -33,7 +34,7 @@ constexpr std::array<float, 8> neighbourCost
     NODE_DIAGONAL_COST
 };
 
-using Grid = std::array<std::array<PathNode*, GRID_WIDTH>, GRID_HEIGHT>;
+using Grid = std::array<std::array<PathNode, GRID_WIDTH>, GRID_HEIGHT>;
 
 struct PathNodeCompare
 {
@@ -69,14 +70,13 @@ private:
 
 
     Grid _grid;
-    Heuristic _heuristic{ Heuristic::MANHATTAN };
-    bool _debugColoring{ false };
-	float _weight = 1.0f;
-	bool _singleStep = false;
-
-	std::vector<PathNode*> _openList; //TODO: Change to tree
+    std::vector<PathNode*> _openList; //TODO: Change to tree
     PathNode* _goalNode{ nullptr };
     PathNode* _parentNode{ nullptr };
+    Heuristic _heuristic{ Heuristic::MANHATTAN };
+    float _weight = 1.0f;
+    bool _debugColoring{ false };
+	bool _singleStep = false;
 
 	// Pathfinding Functions
     PathNode* GetCheapestNodeInOpenList();

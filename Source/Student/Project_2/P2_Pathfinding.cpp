@@ -37,12 +37,11 @@ bool AStarPather::initialize()
     */
 
 	//Setting up the grid
-	for (int i = 0; i < GRID_HEIGHT; i++)
+	for (int i = 0; i < GRID_HEIGHT; ++i)
 	{
-		for (int j = 0; j < GRID_WIDTH; j++)
+		for (int j = 0; j < GRID_WIDTH; ++j)
 		{
-			_grid[i][j] = new PathNode();
-			_grid[i][j]->gridPosition = { i, j };
+			_grid[i][j].gridPosition = { i, j };
 		}
 	}
 
@@ -58,16 +57,6 @@ void AStarPather::shutdown()
     Free any dynamically allocated memory or any other general house-
     keeping you need to do during shutdown.
 	*/
-    _openList.clear();
-    //_closedList.clear();
-
-    for (int i = 0; i < GRID_HEIGHT; i++)
-    {
-        for (int j = 0; j < GRID_WIDTH; j++)
-        {
-			delete _grid[i][j];
-        }
-    }
 }
 
 PathResult AStarPather::compute_path(PathRequest &request)
@@ -120,19 +109,22 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		_weight = request.settings.weight; // Setting the current weight for this request
 		_singleStep = request.settings.singleStep; // Setting the current single step for this request
 
-		_goalNode = _grid[goal.row][goal.col];
+		_goalNode = &_grid[goal.row][goal.col];
 
 		//Pushing the start node onto the open list
-		PathNode& startNode = *_grid[start.row][start.col];
+		PathNode& startNode = _grid[start.row][start.col];
         startNode.parent = nullptr;
         startNode.SetOpenList(true);
-		_openList.push_back(_grid[start.row][start.col]);
+		_openList.push_back(&_grid[start.row][start.col]);
         std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
     }
 
     while (!_openList.empty())
     {
-        _parentNode = GetCheapestNodeInOpenList();
+		std::pop_heap(_openList.begin(), _openList.end(), PathNodeCompare());
+        _parentNode = _openList.back();
+        _openList.pop_back();
+
         if (_parentNode == _goalNode) {
 
             PathNode* node = _parentNode->parent;
@@ -177,12 +169,12 @@ PathNode* AStarPather::GetCheapestNodeInOpenList() //TODO: Optimize using a bina
 
 void AStarPather::UpdateAllNodeNeighbours()
 {
-    for (int i = 0; i < terrain->get_map_height(); i++)
+    for (int i = 0; i < terrain->get_map_height(); ++i)
     {
-        for (int j = 0; j < terrain->get_map_width(); j++)
+        for (int j = 0; j < terrain->get_map_width(); ++j)
         {
             // Does a check to see if the neighbours and wall/in-accessible and preupdate them before pathfinding computation
-            UpdateNodeAccessibleNeighbours(_grid[i][j]);
+            UpdateNodeAccessibleNeighbours(&_grid[i][j]);
         }
     }
 }
@@ -191,9 +183,9 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
 {
 	//Get the neighbours of the current node
     int neighbourIndex = 0;
-    for (int i = -1; i <= 1; i++)
+    for (int i = -1; i <= 1; ++i)
     {
-        for (int j = -1; j <= 1; j++)
+        for (int j = -1; j <= 1; ++j)
         {
 			if (i == 0 && j == 0)
 				continue; //Skip the current node (itself)
@@ -207,15 +199,8 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
             }
 
 			bool isWall = terrain->is_wall(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j });
-			
-            if(!isWall)
-            {
-                inPathNode->neighbours[neighbourIndex] = true;
-            }
-        	else
-            {
-                inPathNode->neighbours[neighbourIndex] = false;
-            }
+
+			inPathNode->neighbours[neighbourIndex] = (!isWall) ? true : false;
 
             neighbourIndex++;
         }
@@ -254,72 +239,68 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 
 	// Add the neighbours of the node to the open list (Top, Left, Right, Bottom)
     
-	for(size_t index = 0; index < inPathNode->neighbours.size(); index++)
+	for(size_t index = 0; index < inPathNode->neighbours.size(); ++index)
 	{
-        if (isNeighbourValid[index])
+        if (!isNeighbourValid[index])
+	        continue;
+
+        GridPos gp { inPathNode->gridPosition.row + neighbourOffsets[index].row, inPathNode->gridPosition.col + neighbourOffsets[index].col };
+        PathNode* neighbour = &_grid[gp.row][gp.col];
+
+        // Adding the given cost of the current node to the neighbour PLUS the straight cost
+        float newGivenCost = inPathNode->givenCost + neighbourCost[index];
+        float newFinalCost = newGivenCost + (CalculateHeuristic(neighbour->gridPosition) * _weight);
+
+        if (!neighbour->IsOnOpenList() && !neighbour->IsOnClosedList())
         {
-            GridPos gp { inPathNode->gridPosition.row + neighbourOffsets[index].row, inPathNode->gridPosition.col + neighbourOffsets[index].col };
-            PathNode* neighbour = _grid[gp.row][gp.col];
+	        neighbour->parent = inPathNode;
+	        neighbour->givenCost = newGivenCost;
+	        neighbour->finalCost = newFinalCost;
+	        neighbour->SetOpenList(true);
 
-            // Adding the given cost of the current node to the neighbour PLUS the straight cost
+	        _openList.push_back(neighbour);
+	        std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
 
-            float newGivenCost = inPathNode->givenCost + neighbourCost[index];
-            float newFinalCost = newGivenCost + (CalculateHeuristic(neighbour->gridPosition) * _weight);
+	        if (_debugColoring)
+		        terrain->set_color(neighbour->gridPosition, Colors::Blue);
+        }
+        else
+        {
+	        if (neighbour->IsOnOpenList()) // If the node is in the open list
+	        {
+		        // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
+		        if (newFinalCost < neighbour->finalCost)
+		        {
+			        neighbour->SetClosedList(false);
 
-            bool isNodeInOpenList = neighbour->IsOnOpenList();
-            bool isNodeInClosedList = neighbour->IsOnClosedList();
+			        neighbour->parent = inPathNode;
+			        neighbour->givenCost = newGivenCost;
+			        neighbour->finalCost = newFinalCost;
+			        neighbour->SetOpenList(true);
 
-            if (!isNodeInOpenList && !isNodeInClosedList)
-            {
-                neighbour->parent = inPathNode;
-                neighbour->givenCost = newGivenCost;
-                neighbour->finalCost = newFinalCost;
-                neighbour->SetOpenList(true);
+			        std::make_heap(_openList.begin(), _openList.end(), PathNodeCompare());
 
-                _openList.push_back(neighbour);
-                std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
+			        if(_debugColoring)
+				        terrain->set_color(neighbour->gridPosition, Colors::Blue);
+		        }
 
-                if (_debugColoring)
-                    terrain->set_color(neighbour->gridPosition, Colors::Blue);
-            }
-            else
-            {
-                if (isNodeInOpenList) // If the node is in the open list
-                {
-                    // Remove the node from the open list if the current neighbour is cheaper than the one that is on it.
-                    if (newFinalCost < neighbour->finalCost)
-                    {
-                        neighbour->SetClosedList(false);
+	        }
+	        else if (neighbour->IsOnClosedList()) // If the node is in the closed list
+	        {
+		        if (newFinalCost < neighbour->finalCost)
+		        {
+			        neighbour->SetClosedList(false);
 
-                        neighbour->parent = inPathNode;
-                        neighbour->givenCost = newGivenCost;
-                        neighbour->finalCost = newFinalCost;
-                        neighbour->SetOpenList(true);
-
-                        std::make_heap(_openList.begin(), _openList.end(), PathNodeCompare());
-
-                        if(_debugColoring)
-                            terrain->set_color(neighbour->gridPosition, Colors::Blue);
-                    }
-
-                }
-                else if (isNodeInClosedList) // If the node is in the closed list
-                {
-                    if (newFinalCost < neighbour->finalCost)
-                    {
-                        neighbour->SetClosedList(false);
-
-                        neighbour->parent = inPathNode;
-                        neighbour->givenCost = newGivenCost;
-                        neighbour->finalCost = newFinalCost;
-                        neighbour->SetOpenList(true);
-                        if (_debugColoring)
-                        	terrain->set_color(neighbour->gridPosition, Colors::Blue);
-                        _openList.push_back(neighbour);
-                        std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
-                    }
-                }
-            }
+			        neighbour->parent = inPathNode;
+			        neighbour->givenCost = newGivenCost;
+			        neighbour->finalCost = newFinalCost;
+			        neighbour->SetOpenList(true);
+			        if (_debugColoring)
+				        terrain->set_color(neighbour->gridPosition, Colors::Blue);
+			        _openList.push_back(neighbour);
+			        std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
+		        }
+	        }
         }
 	}
 }
@@ -348,7 +329,7 @@ float AStarPather::CalculateHeuristic(GridPos inStart)
 
 		case Heuristic::OCTILE:
         {
-            return std::fmin(diffX, diffY) * std::sqrtf(2) + std::fmax(diffX, diffY) - std::fmin(diffX, diffY);
+            return std::fmin(diffX, diffY) * SQRT_2 + std::fmax(diffX, diffY) - std::fmin(diffX, diffY);
         }
 
 		case Heuristic::INCONSISTENT:
@@ -366,7 +347,7 @@ void AStarPather::ResetGrid(int inWidth, int inHeight)
     {
         for (int j = 0; j < inWidth; j++)
         {
-            _grid[i][j]->Reset(i, j);
+            _grid[i][j].Reset(i, j);
         }
     }
 }
