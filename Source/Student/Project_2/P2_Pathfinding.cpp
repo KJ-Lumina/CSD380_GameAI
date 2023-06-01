@@ -141,6 +141,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
         _parentNode->SetOpenList(false);
 		_parentNode->SetClosedList(true);
+
         if (_debugColoring)
 			terrain->set_color(_parentNode->gridPosition, Colors::Yellow);
 
@@ -158,15 +159,6 @@ PathResult AStarPather::compute_path(PathRequest &request)
 /*************************************************************************
  *                      Helper A* FUNCTIONS
  *************************************************************************/
-PathNode* AStarPather::GetCheapestNodeInOpenList() //TODO: Optimize using a binary tree OR Priority Queue
-{
-    //Swap the first node with the last node
-    std::pop_heap(_openList.begin(), _openList.end(), PathNodeCompare());
-    PathNode* cheapestNode = _openList.back();
-    _openList.pop_back();
-    return cheapestNode;
-}
-
 void AStarPather::UpdateAllNodeNeighbours()
 {
     for (int i = 0; i < terrain->get_map_height(); ++i)
@@ -183,26 +175,22 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
 {
 	//Get the neighbours of the current node
     int neighbourIndex = 0;
-    for (int i = -1; i <= 1; ++i)
+    for (int i = -1; i < 2; ++i)
     {
-        for (int j = -1; j <= 1; ++j)
+        for (int j = -1; j < 2; ++j)
         {
 			if (i == 0 && j == 0)
 				continue; //Skip the current node (itself)
 
-            bool isValid = terrain->is_valid_grid_position(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j });
-
-            if (!isValid) {
+            if (!terrain->is_valid_grid_position(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j })) {
 				inPathNode->neighbours[neighbourIndex] = false;
                 neighbourIndex++;
                 continue; //Skip the current node (itself
             }
 
-			bool isWall = terrain->is_wall(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j });
+			inPathNode->neighbours[neighbourIndex] = (!terrain->is_wall(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j })) ? true : false;
 
-			inPathNode->neighbours[neighbourIndex] = (!isWall) ? true : false;
-
-            neighbourIndex++;
+            ++neighbourIndex;
         }
     }
 }
@@ -248,8 +236,8 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
         PathNode* neighbour = &_grid[gp.row][gp.col];
 
         // Adding the given cost of the current node to the neighbour PLUS the straight cost
-        float newGivenCost = inPathNode->givenCost + neighbourCost[index];
-        float newFinalCost = newGivenCost + (CalculateHeuristic(neighbour->gridPosition) * _weight);
+        const float newGivenCost = inPathNode->givenCost + neighbourCost[index];
+        const float newFinalCost = newGivenCost + (CalculateHeuristic(neighbour->gridPosition) * _weight);
 
         if (!neighbour->IsOnOpenList() && !neighbour->IsOnClosedList())
         {
@@ -305,10 +293,10 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 	}
 }
 
-float AStarPather::CalculateHeuristic(GridPos inStart)
+float AStarPather::CalculateHeuristic(GridPos& inStart)
 {
-    float diffX = std::fabsf(static_cast<float>(inStart.row - _goalNode->gridPosition.row));
-    float diffY = std::fabsf(static_cast<float>(inStart.col - _goalNode->gridPosition.col));
+    const float diffX = std::fabsf(static_cast<float>(inStart.row - _goalNode->gridPosition.row));
+    const float diffY = std::fabsf(static_cast<float>(inStart.col - _goalNode->gridPosition.col));
 
 	switch(_heuristic)
 	{
@@ -341,13 +329,13 @@ float AStarPather::CalculateHeuristic(GridPos inStart)
     return 0.0f;
 }
 
-void AStarPather::ResetGrid(int inWidth, int inHeight)
+void AStarPather::ResetGrid(const int inWidth, const int inHeight)
 {
-    for (int i = 0; i < inHeight; i++)
+    for (int i = 0; i < inHeight; ++i)
     {
-        for (int j = 0; j < inWidth; j++)
+        for (int j = 0; j < inWidth; ++j)
         {
-            _grid[i][j].Reset(i, j);
+            _grid[i][j].Reset();
         }
     }
 }

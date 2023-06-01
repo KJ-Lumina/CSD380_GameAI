@@ -15,13 +15,11 @@ public:
 	float finalCost{ 0.0f };
 	std::bitset<2> nodeStates;
 
-	void Reset(int x, int y)
+	void Reset()
 	{
-		parent = nullptr;
 		nodeStates.reset();
 		givenCost = 0.0f;
 		finalCost = 0.0f;
-		gridPosition = { x, y };
 	}
 
 	void SetOpenList(bool value)
@@ -48,8 +46,4 @@ public:
 	{
 		return gridPosition == other.gridPosition;
 	}
-
-
-
-private:
 };

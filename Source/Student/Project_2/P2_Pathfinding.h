@@ -69,7 +69,7 @@ public:
 private:
 
 
-    Grid _grid;
+    Grid _grid {};
     std::vector<PathNode*> _openList; //TODO: Change to tree
     PathNode* _goalNode{ nullptr };
     PathNode* _parentNode{ nullptr };
@@ -79,12 +79,11 @@ private:
 	bool _singleStep = false;
 
 	// Pathfinding Functions
-    PathNode* GetCheapestNodeInOpenList();
     void UpdateAllNodeNeighbours();
 	void UpdateNodeAccessibleNeighbours(PathNode* inPathNode);
 	void AddAllNeighboursToOpenList(PathNode* inPathNode);
 
     //Create the Path Node Compare Function
-    float CalculateHeuristic(GridPos inStart);
+    float CalculateHeuristic(GridPos& inStart);
     void ResetGrid(int inWidth, int inHeight);
 };
