@@ -70,7 +70,7 @@ private:
 
 
     Grid _grid {};
-    std::vector<PathNode*> _openList; //TODO: Change to tree
+	std::vector<PathNode*> _openList; //TODO: Change to tree // TODO: Put it on the stack
     PathNode* _goalNode{ nullptr };
     PathNode* _parentNode{ nullptr };
     Heuristic _heuristic{ Heuristic::MANHATTAN };
@@ -86,4 +86,13 @@ private:
     //Create the Path Node Compare Function
     float CalculateHeuristic(const GridPos& inStart);
     void ResetGrid(int inWidth, int inHeight);
+
+	void RubberBandPath(WaypointList& inPath);
+    bool IsNodeDeletable(const GridPos& inCurrent ,const GridPos& inStart, const GridPos& inEnd);
+
+	void SmoothPath(WaypointList& inPath);
+
+	float GridPosDistance(const GridPos& inStart, const GridPos& inEnd);
+
+    void AddBackNodes(WaypointList& inPath);
 };

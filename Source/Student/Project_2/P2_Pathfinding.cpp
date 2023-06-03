@@ -136,6 +136,23 @@ PathResult AStarPather::compute_path(PathRequest &request)
             }
 
             request.path.emplace_back(request.goal);
+
+        	if (request.settings.rubberBanding && request.settings.smoothing)
+		    {
+		        RubberBandPath(request.path);
+		        AddBackNodes(request.path);
+		        SmoothPath(request.path);
+		    }
+            else if(request.settings.rubberBanding)
+            {
+                RubberBandPath(request.path);
+            }
+            else if(request.settings.smoothing)
+            {
+                SmoothPath(request.path);
+            }
+
+
             return PathResult::COMPLETE;
         }
 
@@ -227,7 +244,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 
 	// Add the neighbours of the node to the open list (Top, Left, Right, Bottom)
     
-	for(size_t index = 0; index < inPathNode->neighbours.size(); ++index)
+	for(int index = 0; index < 8; ++index)
 	{
         if (!isNeighbourValid[index])
 	        continue;
@@ -329,6 +346,205 @@ float AStarPather::CalculateHeuristic(const GridPos& inStart)
 	        return 0.0f;
 	}
 }
+
+void AStarPather::RubberBandPath(WaypointList& inPath)
+{
+	for (int i = 1; i < inPath.size() - 1; ++i)
+	{
+        auto it = inPath.end();
+		std::advance(it, -(i + 1));
+
+		auto itPrev = it;
+		std::advance(itPrev, -1);
+
+		auto itNext = it;
+		std::advance(itNext, 1);
+
+        GridPos itGridPos = terrain->get_grid_position(*it);
+        GridPos itPrevGridPos = terrain->get_grid_position(*itPrev);
+		GridPos itNextGridPos = terrain->get_grid_position(*itNext);
+
+        if(IsNodeDeletable(itGridPos,itPrevGridPos, itNextGridPos))
+        {
+            inPath.erase(it);
+            --i;
+        }
+	}
+}
+
+bool AStarPather::IsNodeDeletable(const GridPos& inCurrent, const GridPos& inStart, const GridPos& inEnd)
+{
+    int diffX = inStart.row - inEnd.row;
+    int diffY = inStart.col - inEnd.col;
+
+    if(diffY == 0)
+    {
+		if (diffX < 0)
+		{
+			for (int i = inStart.row; i <= inEnd.row; ++i)
+			{
+				if (terrain->is_wall({ i, inCurrent.col }))
+					return false;
+			}
+		}
+		else if(diffX > 0)
+		{
+            for (int i = inEnd.row; i <= inStart.row; ++i)
+            {
+                if (terrain->is_wall({ i, inCurrent.col }))
+                    return false;
+            }
+		}
+	}
+	else if(diffY > 0)
+    {
+	    if(diffX == 0)
+	    {
+            for (int j = inEnd.col; j <= inStart.col; ++j)
+            {
+                if (terrain->is_wall({ inCurrent.row, j }))
+                    return false;
+            }
+	    }
+		else if(diffX > 0)
+	    {
+            for (int i = inEnd.row; i <= inStart.row; ++i) {
+                for (int j = inEnd.col; j <= inStart.col; ++j)
+                {
+                    if (terrain->is_wall({ i, j }))
+                        return false;
+                }
+            }
+	    }
+		else if(diffX < 0)
+	    {
+			for (int i = inStart.row; i <= inEnd.row; ++i) {
+                for (int j = inEnd.col; j <= inStart.col; ++j)
+                {
+                    if (terrain->is_wall({ i, j }))
+                        return false;
+                }
+            }
+	    }
+    }
+    else if (diffY < 0)
+    {
+        if (diffX == 0)
+        {
+            for (int j = inStart.col; j <= inEnd.col; ++j)
+            {
+                if (terrain->is_wall({ inStart.row, j }))
+                    return false;
+            }
+        }
+        else if (diffX > 0)
+        {
+            for (int i = inEnd.row; i <= inStart.row; ++i) {
+                for (int j = inStart.col; j <= inEnd.col; ++j)
+                {
+                    if (terrain->is_wall({ i, j }))
+                        return false;
+                }
+            }
+        }
+        else if (diffX < 0)
+        {
+            for (int i = inStart.row; i <= inEnd.row; ++i) {
+                for (int j = inStart.col; j <= inEnd.col; ++j)
+                {
+                    if (terrain->is_wall({ i, j }))
+                        return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+void AStarPather::SmoothPath(WaypointList& inPath)
+{
+    std::vector<Vec3> inputPath;
+    std::list<Vec3> resultPath;
+
+    for(auto& path : inPath)
+    {
+        inputPath.emplace_back(path);
+    }
+
+    for(int i = 0; i < inputPath.size() - 1; ++i)
+    {
+        resultPath.emplace_back(inputPath[i]);
+
+        Vec3 pt1 = (i == 0) ? inputPath[0] : inputPath[i - 1];
+        Vec3 pt2 = inputPath[i];
+        Vec3 pt3 = inputPath[i + 1];
+        Vec3 pt4 = (i == inputPath.size() - 2) ? inputPath[i + 1] : inputPath[i + 2];
+
+        float t = 0.25f;
+
+        for (int j = 0; j < 3; ++j) {
+            Vec3 result = Vec3::CatmullRom(pt1, pt2, pt3, pt4, t);
+            t += 0.25f;
+            resultPath.emplace_back(result);
+        }
+    }
+
+    resultPath.emplace_back(inputPath[inputPath.size() - 1]); // Inserting the last node
+
+    inPath = resultPath;
+}
+
+void AStarPather::AddBackNodes(WaypointList& inPath)
+{
+    //std::vector<Vec3> inputPath;
+	//WaypointList resultPath;
+
+    //for(auto& pathLoc : inPath)
+    //{
+    //    inputPath.emplace_back(pathLoc);
+    //}
+
+    for(int i = 0; i < inPath.size() - 1; ++i)
+    {
+        WaypointList::iterator it_1 = inPath.begin();
+        WaypointList::iterator it_2 = it_1;
+        std::advance(it_1, i);
+        std::advance(it_2, i + 1);
+        Vec3 pt1 = *it_1;
+        Vec3 pt2 = *it_2;
+
+        while (GridPosDistance(terrain->get_grid_position(pt1), terrain->get_grid_position(pt2)) > 1.5f)
+        {
+            //Get Middle Node
+            Vec3 direction{ pt2 - pt1 };
+            Vec3 midPos{ pt1 + (direction / 2.0f) };
+            inPath.insert(it_2, midPos);
+            pt2 = midPos;
+            std::advance(it_2, -1);
+        }
+
+        //if (it_2 == temp_it2)
+        //{
+        //    // No New Node inserted
+        //    it_1 = temp_it2;
+        //    std::advance(temp_it2, 1);
+        //    it_2 = temp_it2;
+        //}
+        //else {
+
+        //    it_1 = temp_it2;
+        //    std::advance(it_1, -1);
+        //    it_2 = temp_it2;
+        //}
+    }
+}
+
+float AStarPather::GridPosDistance(const GridPos& inStart, const GridPos& inEnd)
+{
+    return sqrtf(std::powf(static_cast<float>(inEnd.row - inStart.row), 2) + std::powf(static_cast<float>(inEnd.col - inStart.col), 2));
+}
+
 
 void AStarPather::ResetGrid(const int inWidth, const int inHeight)
 {
