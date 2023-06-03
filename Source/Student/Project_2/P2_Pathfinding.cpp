@@ -497,14 +497,6 @@ void AStarPather::SmoothPath(WaypointList& inPath)
 
 void AStarPather::AddBackNodes(WaypointList& inPath)
 {
-    //std::vector<Vec3> inputPath;
-	//WaypointList resultPath;
-
-    //for(auto& pathLoc : inPath)
-    //{
-    //    inputPath.emplace_back(pathLoc);
-    //}
-
     for(int i = 0; i < inPath.size() - 1; ++i)
     {
         WaypointList::iterator it_1 = inPath.begin();
@@ -521,22 +513,8 @@ void AStarPather::AddBackNodes(WaypointList& inPath)
             Vec3 midPos{ pt1 + (direction / 2.0f) };
             inPath.insert(it_2, midPos);
             pt2 = midPos;
-            std::advance(it_2, -1);
+            it_2 = std::prev(it_2, 1);
         }
-
-        //if (it_2 == temp_it2)
-        //{
-        //    // No New Node inserted
-        //    it_1 = temp_it2;
-        //    std::advance(temp_it2, 1);
-        //    it_2 = temp_it2;
-        //}
-        //else {
-
-        //    it_1 = temp_it2;
-        //    std::advance(it_1, -1);
-        //    it_2 = temp_it2;
-        //}
     }
 }
 
