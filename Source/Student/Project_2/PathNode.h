@@ -16,7 +16,7 @@ public:
 	void Reset()
 	{
 		nodeStates.reset();
-		givenCost = 0.0f;
+		//givenCost = 0.0f;
 		finalCost = 0.0f;
 	}
 

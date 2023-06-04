@@ -2,13 +2,92 @@
 #include "Misc/PathfindingDetails.hpp"
 #include "PathNode.h"
 #include <vector>
-#include <queue>
 
 constexpr int GRID_WIDTH = 40;
 constexpr int GRID_HEIGHT = 40;
 constexpr float SQRT_2 = 1.41421356237f;
 constexpr float NODE_DIAGONAL_COST = SQRT_2;
 constexpr float NODE_STRAIGHT_COST = 1.0f;
+constexpr float INF = 1000000.0f;
+
+constexpr float cfmin(const float a, const float b) {
+    return (a < b) ? a : b;
+}
+
+constexpr float cfmax(const float a, const float b) {
+    return (a > b) ? a : b;
+}
+
+constexpr float HeuristicOctile(const float diffX, const float diffY)
+{
+	return cfmin(diffX, diffY) * SQRT_2 + cfmax(diffX, diffY) - cfmin(diffX, diffY);
+}
+
+inline float HeuristicManhattan(const GridPos& inStart, const GridPos& inEnd)
+{
+    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
+    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
+    return diffX + diffY;
+}
+
+
+inline float HeuristicChebyshev(const GridPos& inStart, const GridPos& inEnd)
+{
+    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
+    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
+    return std::fmax(diffX, diffY);
+}
+
+inline float HeuristicEuclidean(const GridPos& inStart, const GridPos& inEnd)
+{
+    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
+    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
+    return std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2));
+}
+
+inline float HeuristicInconsistent(const GridPos& inStart, const GridPos& inEnd)
+{
+    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
+    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
+    return ((inStart.row + inStart.col % 2) > 0) ? std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2)) : 0.0f;
+}
+
+inline float CalculateHeuristic(const GridPos& inStart, Heuristic _heuristic, const GridPos& inEnd)
+{
+    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
+    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
+
+    switch (_heuristic)
+    {
+    case Heuristic::MANHATTAN:
+    {
+        return HeuristicManhattan(inStart, inEnd);
+    }
+
+    case Heuristic::EUCLIDEAN:
+    {
+        return HeuristicEuclidean(inStart, inEnd);
+    }
+
+    case Heuristic::CHEBYSHEV:
+    {
+        return HeuristicChebyshev(inStart, inEnd);
+    }
+
+    case Heuristic::OCTILE:
+    {
+        return HeuristicOctile(diffX, diffY);
+    }
+
+    case Heuristic::INCONSISTENT:
+    {
+        return HeuristicInconsistent(inStart, inEnd);
+    }
+
+    default:
+        return 0.0f;
+    }
+}
 
 constexpr std::array<GridPos, 8> neighbourOffsets
 {
@@ -84,7 +163,7 @@ private:
 	void AddAllNeighboursToOpenList(PathNode* inPathNode);
 
     //Create the Path Node Compare Function
-    float CalculateHeuristic(const GridPos& inStart);
+    //float CalculateHeuristic(const GridPos& inStart);
     void ResetGrid(int inWidth, int inHeight);
 
 	void RubberBandPath(WaypointList& inPath);

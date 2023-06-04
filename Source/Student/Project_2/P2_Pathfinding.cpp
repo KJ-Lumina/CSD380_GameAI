@@ -6,6 +6,48 @@
 #pragma region Extra Credit
 bool ProjectTwo::implemented_floyd_warshall()
 {
+	std::array<std::array<float, GRID_WIDTH>, GRID_HEIGHT> floydWarshallCosts;
+
+	//Defaulting all costs
+	for (int i = 0; i < GRID_HEIGHT; ++i)
+	{
+		for (int j = 0; j < GRID_WIDTH; ++j)
+		{
+			if(i == j)
+			{
+                floydWarshallCosts[i][j] = 0;
+			}
+			else
+			{
+                floydWarshallCosts[i][j] = INF;
+			}
+		}
+	}
+
+	//Updating the adjacent costs
+	for (int i = 0; i < GRID_HEIGHT; ++i) {
+		for (int j = 0; j < GRID_WIDTH; ++j) {
+			if (floydWarshallCosts[i][j] < INF) {
+				//floydWarshallCosts[i][j] = floydWarshallCosts[i][j].weight;
+			}
+		}
+	}
+
+
+	// Computing the costs
+    for (int k = 0; k < GRID_WIDTH; k++) {
+        for (int i = 0; i < GRID_HEIGHT; i++) {
+            for (int j = 0; j < GRID_WIDTH; j++) {
+                if (floydWarshallCosts[i][k] < INF && floydWarshallCosts[k][j] < INF) {
+                    floydWarshallCosts[i][j] = std::fmin(floydWarshallCosts[i][j], floydWarshallCosts[i][k] + floydWarshallCosts[k][j]);
+                }
+            }
+        }
+    }
+
+
+
+
     return false;
 }
 
@@ -152,7 +194,6 @@ PathResult AStarPather::compute_path(PathRequest &request)
                 SmoothPath(request.path);
             }
 
-
             return PathResult::COMPLETE;
         }
 
@@ -254,7 +295,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 
         // Adding the given cost of the current node to the neighbour PLUS the straight cost
         const float newGivenCost = inPathNode->givenCost + neighbourCost[index];
-        const float newFinalCost = newGivenCost + (CalculateHeuristic(neighbour->gridPosition) * _weight);
+        const float newFinalCost = newGivenCost + (CalculateHeuristic(neighbour->gridPosition, _heuristic, _goalNode->gridPosition) * _weight);
 
         if (!neighbour->IsOnOpenList() && !neighbour->IsOnClosedList())
         {
@@ -310,42 +351,47 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 	}
 }
 
-float AStarPather::CalculateHeuristic(const GridPos& inStart)
-{
-    const float diffX = std::fabsf(static_cast<float>(inStart.row - _goalNode->gridPosition.row));
-    const float diffY = std::fabsf(static_cast<float>(inStart.col - _goalNode->gridPosition.col));
-
-	switch(_heuristic)
-	{
-		case Heuristic::MANHATTAN:
-		{
-            return diffX + diffY;
-		}
-
-		case Heuristic::EUCLIDEAN:
-        {
-            return std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2));
-        }
-
-		case Heuristic::CHEBYSHEV:
-        {
-           return std::fmax(diffX, diffY);
-        }
-
-		case Heuristic::OCTILE:
-        {
-            return std::fmin(diffX, diffY) * SQRT_2 + std::fmax(diffX, diffY) - std::fmin(diffX, diffY);
-        }
-
-		case Heuristic::INCONSISTENT:
-        {
-            return ((inStart.row + inStart.col % 2) > 0) ? std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2)) : 0.0f;
-        }
-
-		default:
-	        return 0.0f;
-	}
-}
+//float AStarPather::CalculateHeuristic(const GridPos& inStart)
+//{
+//    //const float diffX = std::fabsf(static_cast<float>(inStart.row - _goalNode->gridPosition.row));
+//    //const float diffY = std::fabsf(static_cast<float>(inStart.col - _goalNode->gridPosition.col));
+//
+//	switch(_heuristic)
+//	{
+//		case Heuristic::MANHATTAN:
+//		{
+//			return HeuristicManhattan(inStart, _goalNode->gridPosition);
+//            //return diffX + diffY;
+//		}
+//
+//		case Heuristic::EUCLIDEAN:
+//        {
+//			return HeuristicEuclidean(inStart, _goalNode->gridPosition);
+//            //return std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2));
+//        }
+//
+//		case Heuristic::CHEBYSHEV:
+//        {
+//			return HeuristicChebyshev(inStart, _goalNode->gridPosition);
+//           //return std::fmax(diffX, diffY);
+//        }
+//
+//		case Heuristic::OCTILE:
+//        {
+//			return HeuristicOctile(inStart, _goalNode->gridPosition);
+//            //return std::fmin(diffX, diffY) * SQRT_2 + std::fmax(diffX, diffY) - std::fmin(diffX, diffY);
+//        }
+//
+//		case Heuristic::INCONSISTENT:
+//        {
+//			return HeuristicInconsistent(inStart, _goalNode->gridPosition);
+//            //return ((inStart.row + inStart.col % 2) > 0) ? std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2)) : 0.0f;
+//        }
+//
+//		default:
+//	        return 0.0f;
+//	}
+//}
 
 void AStarPather::RubberBandPath(WaypointList& inPath)
 {
@@ -497,32 +543,27 @@ void AStarPather::SmoothPath(WaypointList& inPath)
 
 void AStarPather::AddBackNodes(WaypointList& inPath)
 {
+	const float distance = Vec3::Distance(terrain->get_world_position(0, 1), terrain->get_world_position(0, 0)) * 1.5f;
+
     for(int i = 0; i < inPath.size() - 1; ++i)
     {
         WaypointList::iterator it_1 = inPath.begin();
-        WaypointList::iterator it_2 = it_1;
         std::advance(it_1, i);
-        std::advance(it_2, i + 1);
+        WaypointList::iterator it_2 = std::next(it_1, 1);
         Vec3 pt1 = *it_1;
         Vec3 pt2 = *it_2;
 
-        while (GridPosDistance(terrain->get_grid_position(pt1), terrain->get_grid_position(pt2)) > 1.5f)
+        while (Vec3::Distance(pt1 ,pt2) > distance)
         {
             //Get Middle Node
             Vec3 direction{ pt2 - pt1 };
             Vec3 midPos{ pt1 + (direction / 2.0f) };
             inPath.insert(it_2, midPos);
-            pt2 = midPos;
-            it_2 = std::prev(it_2, 1);
+            it_2 = std::next(it_1, 1);
+            pt2 = *it_2;
         }
     }
 }
-
-float AStarPather::GridPosDistance(const GridPos& inStart, const GridPos& inEnd)
-{
-    return sqrtf(std::powf(static_cast<float>(inEnd.row - inStart.row), 2) + std::powf(static_cast<float>(inEnd.col - inStart.col), 2));
-}
-
 
 void AStarPather::ResetGrid(const int inWidth, const int inHeight)
 {
