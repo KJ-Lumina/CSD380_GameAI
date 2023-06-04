@@ -241,12 +241,13 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
 				continue; //Skip the current node (itself)
 
             if (!terrain->is_valid_grid_position(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j })) {
-				inPathNode->neighbours[neighbourIndex] = false;
+				inPathNode->setNeighbor(neighbourIndex, false);
+				//inPathNode->neighbours[neighbourIndex] = false;
                 neighbourIndex++;
                 continue; //Skip the current node (itself
             }
 
-			inPathNode->neighbours[neighbourIndex] = (!terrain->is_wall(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j })) ? true : false;
+            inPathNode->setNeighbor(neighbourIndex, (!terrain->is_wall(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j })) ? true : false);
 
             ++neighbourIndex;
         }
@@ -256,38 +257,39 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
 //Add the neighbours of the node to the open list
 void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 {
-    std::array<bool, 8> isNeighbourValid = inPathNode->neighbours;
+   char isNeighbourValid = inPathNode->neighbours;
 
     //Check if the diagonal neighbours are valid
-    if(!inPathNode->neighbours[1])
+    if(!inPathNode->getNeighbor(1))
     {
-        isNeighbourValid[0] = false;
-        isNeighbourValid[2] = false;
+        inPathNode->setNeighbor(0, false);
+        inPathNode->setNeighbor(2, false);
     }
 
-    if(!inPathNode->neighbours[3])
+    if(!inPathNode->getNeighbor(3))
     {
-        isNeighbourValid[0] = false;
-        isNeighbourValid[5] = false;
+        inPathNode->setNeighbor(0, false);
+        inPathNode->setNeighbor(5, false);
     }
 
-    if (!inPathNode->neighbours[4])
+    if (!inPathNode->getNeighbor(4))
     {
-        isNeighbourValid[2] = false;
-        isNeighbourValid[7] = false;
+        inPathNode->setNeighbor(2, false);
+        inPathNode->setNeighbor(7, false);
+
     }
 
-    if (!inPathNode->neighbours[6])
+    if (!inPathNode->getNeighbor(6))
     {
-        isNeighbourValid[5] = false;
-        isNeighbourValid[7] = false;
+        inPathNode->setNeighbor(5, false);
+        inPathNode->setNeighbor(7, false);
     }
 
 	// Add the neighbours of the node to the open list (Top, Left, Right, Bottom)
     
 	for(int index = 0; index < 8; ++index)
 	{
-        if (!isNeighbourValid[index])
+        if (!inPathNode->getNeighbor(index))
 	        continue;
 
         GridPos gp { inPathNode->gridPosition.row + neighbourOffsets[index].row, inPathNode->gridPosition.col + neighbourOffsets[index].col };
@@ -350,48 +352,6 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
         }
 	}
 }
-
-//float AStarPather::CalculateHeuristic(const GridPos& inStart)
-//{
-//    //const float diffX = std::fabsf(static_cast<float>(inStart.row - _goalNode->gridPosition.row));
-//    //const float diffY = std::fabsf(static_cast<float>(inStart.col - _goalNode->gridPosition.col));
-//
-//	switch(_heuristic)
-//	{
-//		case Heuristic::MANHATTAN:
-//		{
-//			return HeuristicManhattan(inStart, _goalNode->gridPosition);
-//            //return diffX + diffY;
-//		}
-//
-//		case Heuristic::EUCLIDEAN:
-//        {
-//			return HeuristicEuclidean(inStart, _goalNode->gridPosition);
-//            //return std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2));
-//        }
-//
-//		case Heuristic::CHEBYSHEV:
-//        {
-//			return HeuristicChebyshev(inStart, _goalNode->gridPosition);
-//           //return std::fmax(diffX, diffY);
-//        }
-//
-//		case Heuristic::OCTILE:
-//        {
-//			return HeuristicOctile(inStart, _goalNode->gridPosition);
-//            //return std::fmin(diffX, diffY) * SQRT_2 + std::fmax(diffX, diffY) - std::fmin(diffX, diffY);
-//        }
-//
-//		case Heuristic::INCONSISTENT:
-//        {
-//			return HeuristicInconsistent(inStart, _goalNode->gridPosition);
-//            //return ((inStart.row + inStart.col % 2) > 0) ? std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2)) : 0.0f;
-//        }
-//
-//		default:
-//	        return 0.0f;
-//	}
-//}
 
 void AStarPather::RubberBandPath(WaypointList& inPath)
 {
