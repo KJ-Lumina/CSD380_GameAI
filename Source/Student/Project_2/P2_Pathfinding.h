@@ -164,7 +164,7 @@ private:
 
     //Create the Path Node Compare Function
     //float CalculateHeuristic(const GridPos& inStart);
-    void ResetGrid(int inWidth, int inHeight);
+    void ResetGrid();
 
 	void RubberBandPath(WaypointList& inPath);
     bool IsNodeDeletable(const GridPos& inCurrent ,const GridPos& inStart, const GridPos& inEnd);

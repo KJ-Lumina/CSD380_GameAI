@@ -3,6 +3,13 @@
 #include <array>
 #include <bitset>
 
+enum NodeState
+{
+	NONE = 0,
+	OPEN,
+	CLOSED
+};
+
 class PathNode
 {
 public:
@@ -10,7 +17,7 @@ public:
 	GridPos gridPosition{0, 0 };
 	float givenCost{ 0.0f };
 	float finalCost{ 0.0f };
-	std::bitset<2> nodeStates;
+	NodeState nodeStates;
 	char neighbours;
 
 	void setNeighbor(int index, bool value) {
@@ -31,29 +38,9 @@ public:
 
 	void Reset()
 	{
-		nodeStates.reset();
+		nodeStates = NodeState::NONE;
 		//givenCost = 0.0f;
 		finalCost = 0.0f;
-	}
-
-	void SetOpenList(bool value)
-	{
-		nodeStates.set(0, value);
-	}
-
-	void SetClosedList(bool value)
-	{
-		nodeStates.set(1, value);
-	}
-
-	bool IsOnOpenList() const
-	{
-		return nodeStates.test(0);
-	}
-
-	bool IsOnClosedList() const
-	{
-		return nodeStates.test(1);
 	}
 
 	bool operator== (const PathNode& other) const
