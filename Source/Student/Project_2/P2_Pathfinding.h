@@ -5,57 +5,57 @@
 
 constexpr int GRID_WIDTH = 40;
 constexpr int GRID_HEIGHT = 40;
-constexpr float SQRT_2 = 1.41421356237f;
-constexpr float NODE_DIAGONAL_COST = SQRT_2;
-constexpr float NODE_STRAIGHT_COST = 1.0f;
+constexpr int SQRT_2 = 14124;
+constexpr int NODE_DIAGONAL_COST = SQRT_2;
+constexpr int NODE_STRAIGHT_COST = 10000;
+constexpr int OCTILE_MIN = NODE_DIAGONAL_COST - NODE_STRAIGHT_COST;
 constexpr float INF = 1000000.0f;
 
-constexpr float cfmin(const float a, const float b) {
+constexpr int cfmin(const int a, const int b) {
     return (a < b) ? a : b;
 }
 
-constexpr float cfmax(const float a, const float b) {
+constexpr int cfmax(const int a, const int b) {
     return (a > b) ? a : b;
 }
 
-constexpr float HeuristicOctile(const float diffX, const float diffY)
+constexpr int HeuristicOctile(const int diffX, const int diffY)
 {
-	return cfmin(diffX, diffY) * SQRT_2 + cfmax(diffX, diffY) - cfmin(diffX, diffY);
+	return OCTILE_MIN * cfmin(diffX, diffY) + NODE_STRAIGHT_COST * cfmax(diffX, diffY);
 }
 
-inline float HeuristicManhattan(const GridPos& inStart, const GridPos& inEnd)
+inline int HeuristicManhattan(const GridPos& inStart, const GridPos& inEnd)
 {
-    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
-    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
+    const int diffX = std::abs(inStart.row - inEnd.row);
+    const int diffY = std::abs(inStart.col - inEnd.col);
     return diffX + diffY;
 }
 
-
-inline float HeuristicChebyshev(const GridPos& inStart, const GridPos& inEnd)
+inline int HeuristicChebyshev(const GridPos& inStart, const GridPos& inEnd)
 {
-    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
-    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
-    return std::fmax(diffX, diffY);
+    const int diffX = std::abs(inStart.row - inEnd.row);
+    const int diffY = std::abs(inStart.col - inEnd.col);
+    return std::max(diffX, diffY);
 }
 
-inline float HeuristicEuclidean(const GridPos& inStart, const GridPos& inEnd)
+inline int HeuristicEuclidean(const GridPos& inStart, const GridPos& inEnd)
 {
-    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
-    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
-    return std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2));
+    const int diffX = std::abs(inStart.row - inEnd.row);
+    const int diffY = std::abs(inStart.col - inEnd.col);
+	return static_cast<int>(sqrtf(static_cast<float>(diffX * diffX + diffY * diffY)));
 }
 
-inline float HeuristicInconsistent(const GridPos& inStart, const GridPos& inEnd)
+inline int HeuristicInconsistent(const GridPos& inStart, const GridPos& inEnd)
 {
-    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
-    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
-    return ((inStart.row + inStart.col % 2) > 0) ? std::sqrtf(std::powf(diffX, 2) + std::powf(diffY, 2)) : 0.0f;
+    const int diffX = std::abs(inStart.row - inEnd.row);
+    const int diffY = std::abs(inStart.col - inEnd.col);
+    return ((inStart.row + inStart.col % 2) > 0) ? HeuristicEuclidean(inStart,inEnd) : 0;
 }
 
-inline float CalculateHeuristic(const GridPos& inStart, Heuristic _heuristic, const GridPos& inEnd)
+inline int CalculateHeuristic(const GridPos& inStart, Heuristic _heuristic, const GridPos& inEnd)
 {
-    const float diffX = std::fabsf(static_cast<float>(inStart.row - inEnd.row));
-    const float diffY = std::fabsf(static_cast<float>(inStart.col - inEnd.col));
+    const int diffX = std::abs(inStart.row - inEnd.row);
+    const int diffY = std::abs(inStart.col - inEnd.col);
 
     switch (_heuristic)
     {
@@ -85,7 +85,7 @@ inline float CalculateHeuristic(const GridPos& inStart, Heuristic _heuristic, co
     }
 
     default:
-        return 0.0f;
+        return 0;
     }
 }
 
@@ -101,7 +101,7 @@ constexpr std::array<GridPos, 8> neighbourOffsets
     GridPos{ 1, 1 }
 };
 
-constexpr std::array<float, 8> neighbourCost
+constexpr std::array<int, 8> neighbourCost
 {
     NODE_DIAGONAL_COST,
     NODE_STRAIGHT_COST,

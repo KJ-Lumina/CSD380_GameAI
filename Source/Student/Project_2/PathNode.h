@@ -15,8 +15,8 @@ class PathNode
 public:
 	PathNode* parent{ nullptr };
 	GridPos gridPosition{0, 0 };
-	float givenCost{ 0.0f };
-	float finalCost{ 0.0f };
+	int givenCost{ 0 };
+	int finalCost{ 0 };
 	NodeState nodeStates;
 	char neighbours;
 
@@ -40,7 +40,7 @@ public:
 	{
 		nodeStates = NodeState::NONE;
 		//givenCost = 0.0f;
-		finalCost = 0.0f;
+		finalCost = 0;
 	}
 
 	bool operator== (const PathNode& other) const

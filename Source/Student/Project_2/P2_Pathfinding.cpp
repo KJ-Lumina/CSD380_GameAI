@@ -289,8 +289,8 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
         PathNode* neighbour = &_grid[gp.row][gp.col];
 
         // Adding the given cost of the current node to the neighbour PLUS the straight cost
-        const float newGivenCost = inPathNode->givenCost + neighbourCost[index];
-        const float newFinalCost = newGivenCost + (CalculateHeuristic(neighbour->gridPosition, _heuristic, _goalNode->gridPosition) * _weight);
+        const int newGivenCost = inPathNode->givenCost + neighbourCost[index];
+        const int newFinalCost = newGivenCost + static_cast<int>(CalculateHeuristic(neighbour->gridPosition, _heuristic, _goalNode->gridPosition) * _weight);
 
         if (neighbour->nodeStates == 0)
         {
