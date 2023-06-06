@@ -59,6 +59,11 @@ inline int CalculateHeuristic(const GridPos& inStart, Heuristic _heuristic, cons
 
     switch (_heuristic)
     {
+    case Heuristic::OCTILE:
+    {
+        return HeuristicOctile(diffX, diffY);
+    }
+
     case Heuristic::MANHATTAN:
     {
         return HeuristicManhattan(inStart, inEnd);
@@ -74,10 +79,6 @@ inline int CalculateHeuristic(const GridPos& inStart, Heuristic _heuristic, cons
         return HeuristicChebyshev(inStart, inEnd);
     }
 
-    case Heuristic::OCTILE:
-    {
-        return HeuristicOctile(diffX, diffY);
-    }
 
     case Heuristic::INCONSISTENT:
     {

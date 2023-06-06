@@ -6,45 +6,6 @@
 #pragma region Extra Credit
 bool ProjectTwo::implemented_floyd_warshall()
 {
-	std::array<std::array<float, GRID_WIDTH>, GRID_HEIGHT> floydWarshallCosts;
-
-	//Defaulting all costs
-	for (int i = 0; i < GRID_HEIGHT; ++i)
-	{
-		for (int j = 0; j < GRID_WIDTH; ++j)
-		{
-			if(i == j)
-			{
-                floydWarshallCosts[i][j] = 0;
-			}
-			else
-			{
-                floydWarshallCosts[i][j] = INF;
-			}
-		}
-	}
-
-	//Updating the adjacent costs
-	for (int i = 0; i < GRID_HEIGHT; ++i) {
-		for (int j = 0; j < GRID_WIDTH; ++j) {
-			if (floydWarshallCosts[i][j] < INF) {
-				//floydWarshallCosts[i][j] = floydWarshallCosts[i][j].weight;
-			}
-		}
-	}
-
-
-	// Computing the costs
-    for (int k = 0; k < GRID_WIDTH; k++) {
-        for (int i = 0; i < GRID_HEIGHT; i++) {
-            for (int j = 0; j < GRID_WIDTH; j++) {
-                if (floydWarshallCosts[i][k] < INF && floydWarshallCosts[k][j] < INF) {
-                    floydWarshallCosts[i][j] = std::fmin(floydWarshallCosts[i][j], floydWarshallCosts[i][k] + floydWarshallCosts[k][j]);
-                }
-            }
-        }
-    }
-
     return false;
 }
 
