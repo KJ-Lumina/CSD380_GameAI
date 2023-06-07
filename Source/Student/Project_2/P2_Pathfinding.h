@@ -127,6 +127,16 @@ struct PathNodeCompare
 	}
 };
 
+class UnsortedList
+{
+public:
+    std::array<PathNode*, 158> _list{};
+    int gridSize = 0;
+
+    void Push(PathNode* inPathNode);
+    PathNode* FindCheapestNodeAndPop();
+};
+
 class AStarPather
 {
 public:
@@ -155,7 +165,8 @@ private:
     int distance[V][V]{};
     int previous[V][V]{}; //tracking the previous Index 
     Grid _grid {};
-	std::vector<PathNode*> _openList; //TODO: Change to tree // TODO: Put it on the stack
+	UnsortedList _openList;
+	//std::vector<PathNode*> _openList; //TODO: Change to tree // TODO: Put it on the stack
     PathNode* _goalNode{ nullptr };
     PathNode* _parentNode{ nullptr };
     Heuristic _heuristic{ Heuristic::MANHATTAN };
@@ -185,3 +196,4 @@ private:
 	void CreateFloydPath(WaypointList& inPath, const std::vector<int>& inPathIndices);
     bool Floyd_IsValidPosition(const int inStart, const int inEnd, bool& outIsDiagonal);
 };
+

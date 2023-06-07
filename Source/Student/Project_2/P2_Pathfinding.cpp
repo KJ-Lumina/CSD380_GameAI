@@ -48,8 +48,8 @@ bool AStarPather::initialize()
     Callback cb = std::bind(&AStarPather::UpdateAllNodeNeighbours, this);
     Messenger::listen_for_message(Messages::MAP_CHANGE, cb);
 
-    Callback floydcb = std::bind(&AStarPather::FloydPathReconstruction, this);
-    Messenger::listen_for_message(Messages::MAP_CHANGE, floydcb);
+    //Callback floydcb = std::bind(&AStarPather::FloydPathReconstruction, this);
+    //Messenger::listen_for_message(Messages::MAP_CHANGE, floydcb);
 
     return true; // return false if any errors actually occur, to stop engine initialization
 }
@@ -99,7 +99,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
     // Declaring the start and goal nodes
     if (request.newRequest)
     {
-		if (request.settings.method != Method::FLOYD_WARSHALL){
+		//if (request.settings.method != Method::FLOYD_WARSHALL){
 
             ResetGrid();
 
@@ -107,7 +107,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
             GridPos goal = terrain->get_grid_position(request.goal);
 
             //Clear the open and closed lists
-            _openList.clear();
+            _openList.gridSize = 0;
 
             _heuristic = request.settings.heuristic; // Setting the current heuristic for this request
             _debugColoring = request.settings.debugColoring; // Setting the current debug coloring for this request
@@ -120,10 +120,13 @@ PathResult AStarPather::compute_path(PathRequest &request)
             PathNode& startNode = _grid[start.row][start.col];
             startNode.parent = nullptr;
             startNode.nodeStates = NodeState::OPEN;
-            _openList.push_back(&_grid[start.row][start.col]);
-            std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
-		}
-		else
+
+            _openList.Push(&_grid[start.row][start.col]);
+
+            //_openList.push_back(&_grid[start.row][start.col]);
+            //std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
+		//}
+		/*else
         {
 		    GridPos start = terrain->get_grid_position(request.start);
 		    GridPos goal = terrain->get_grid_position(request.goal);
@@ -138,14 +141,16 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		    CreateFloydPath(request.path, path);
 
 		    return PathResult::COMPLETE;
-		}
+		}*/
     }
 
-    while (!_openList.empty())
+    while (_openList.gridSize > 0)
     {
-		std::pop_heap(_openList.begin(), _openList.end(), PathNodeCompare());
-        _parentNode = _openList.back();
-        _openList.pop_back();
+        _parentNode = _openList.FindCheapestNodeAndPop();
+
+		//std::pop_heap(_openList.begin(), _openList.end(), PathNodeCompare());
+  //      _parentNode = _openList.back();
+  //      _openList.pop_back();
 
         if (_parentNode == _goalNode) {
 
@@ -281,8 +286,10 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 	        neighbour->finalCost = newFinalCost;
             neighbour->nodeStates = NodeState::OPEN;
 
-	        _openList.push_back(neighbour);
-	        std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
+            _openList.Push(neighbour);
+
+	        //_openList.push_back(neighbour);
+	        //std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
 
 	        if (_debugColoring)
 		        terrain->set_color(neighbour->gridPosition, Colors::Blue);
@@ -292,7 +299,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
             neighbour->parent = inPathNode;
             neighbour->givenCost = newGivenCost;
             neighbour->finalCost = newFinalCost;
-            std::make_heap(_openList.begin(), _openList.end(), PathNodeCompare());
+            //std::make_heap(_openList.begin(), _openList.end(), PathNodeCompare());
         }
 	}
 }
@@ -642,4 +649,33 @@ bool AStarPather::Floyd_IsValidPosition(const int inStart, const int inEnd, bool
     }
 
     return true;
+}
+
+void UnsortedList::Push(PathNode* inPathNode) {
+    _list[gridSize] = inPathNode;
+    ++gridSize;
+}
+
+PathNode* UnsortedList::FindCheapestNodeAndPop()
+{
+    if (gridSize == 0) {
+        throw std::out_of_range("List is empty");
+    }
+
+    int minCost = INT_MAX;
+    int minIndex = -1;
+
+    for (int i = 0; i < gridSize; ++i) {
+        if (_list[i]->finalCost < minCost) {
+            minCost = _list[i]->finalCost;
+            minIndex = i;
+        }
+    }
+
+    PathNode* cheapestNode = _list[minIndex];
+    // Move every element after the cheapest node one step towards the beginning of the list
+    std::move(_list.begin() + minIndex + 1, _list.begin() + gridSize, _list.begin() + minIndex);
+    --gridSize;
+
+    return cheapestNode;
 }
