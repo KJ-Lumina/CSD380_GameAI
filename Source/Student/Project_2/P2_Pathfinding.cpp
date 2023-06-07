@@ -6,7 +6,7 @@
 #pragma region Extra Credit
 bool ProjectTwo::implemented_floyd_warshall()
 {
-    return false;
+    return true;
 }
 
 bool ProjectTwo::implemented_goal_bounding()
@@ -99,7 +99,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
     // Declaring the start and goal nodes
     if (request.newRequest)
     {
-        if (request.settings.method == Method::ASTAR) {
+		if (request.settings.method != Method::FLOYD_WARSHALL){
 
             ResetGrid();
 
@@ -122,23 +122,23 @@ PathResult AStarPather::compute_path(PathRequest &request)
             startNode.nodeStates = NodeState::OPEN;
             _openList.push_back(&_grid[start.row][start.col]);
             std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
-        }
-    	else if(request.settings.method == Method::FLOYD_WARSHALL)
+		}
+		else
         {
-            GridPos start = terrain->get_grid_position(request.start);
-            GridPos goal = terrain->get_grid_position(request.goal);
+		    GridPos start = terrain->get_grid_position(request.start);
+		    GridPos goal = terrain->get_grid_position(request.goal);
 
-            const std::vector<int> path = Floyd_GetPath(start, goal);
+		    const std::vector<int> path = Floyd_GetPath(start, goal);
 
-            if(path.empty())
-            {
-                return PathResult::IMPOSSIBLE;
-            }
+		    if (path.empty())
+		    {
+		        return PathResult::IMPOSSIBLE;
+		    }
 
-            CreateFloydPath(request.path, path);
+		    CreateFloydPath(request.path, path);
 
-            return PathResult::COMPLETE;
-        }
+		    return PathResult::COMPLETE;
+		}
     }
 
     while (!_openList.empty())
