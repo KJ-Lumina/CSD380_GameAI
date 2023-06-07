@@ -150,7 +150,9 @@ public:
 
 private:
 
-
+    //Floyd Warshall Variables
+    int distance[V][V]{};
+    int previous[V][V]{}; //tracking the previous Index 
     Grid _grid {};
 	std::vector<PathNode*> _openList; //TODO: Change to tree // TODO: Put it on the stack
     PathNode* _goalNode{ nullptr };
@@ -159,10 +161,6 @@ private:
     float _weight = 1.0f;
     bool _debugColoring{ false };
     bool _singleStep{ false };
-
-    //Floyd Warshall Variables
-    int distance[V][V]{};
-    int previous[V][V]{}; //tracking the previous Index 
 
 	// Pathfinding Functions
     void UpdateAllNodeNeighbours();
