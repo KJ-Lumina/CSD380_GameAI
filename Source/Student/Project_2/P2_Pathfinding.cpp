@@ -221,7 +221,6 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
 
             if (!terrain->is_valid_grid_position(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j })) {
 				inPathNode->setNeighbor(neighbourIndex, false);
-				//inPathNode->neighbours[neighbourIndex] = false;
                 neighbourIndex++;
                 continue; //Skip the current node (itself
             }
@@ -554,6 +553,7 @@ std::vector<int> AStarPather::Floyd_GetPath(GridPos& inStart, GridPos& inEnd)
     if (previous[start][end] == -1) {
         return std::vector<int>();  // Empty path
     }
+
     std::vector<int> path;
     path.push_back(end);
     int u = start, v = end;

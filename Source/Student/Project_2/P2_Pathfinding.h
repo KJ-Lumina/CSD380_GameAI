@@ -1,6 +1,7 @@
 #pragma once
 #include "Misc/PathfindingDetails.hpp"
 #include "PathNode.h"
+#include "limits.h"
 #include <vector>
 
 constexpr int GRID_WIDTH = 40;
@@ -9,7 +10,7 @@ constexpr int SQRT_2 = 14124;
 constexpr int NODE_DIAGONAL_COST = SQRT_2;
 constexpr int NODE_STRAIGHT_COST = 10000;
 constexpr int OCTILE_MIN = NODE_DIAGONAL_COST - NODE_STRAIGHT_COST;
-constexpr int INF = 1000000;
+constexpr int INF = 100000000;
 
 constexpr int cfmin(const int a, const int b) {
     return (a < b) ? a : b;
