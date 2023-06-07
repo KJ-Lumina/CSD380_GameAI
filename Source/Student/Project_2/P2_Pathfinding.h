@@ -58,13 +58,11 @@ inline int CalculateHeuristic(const GridPos& inStart, Heuristic _heuristic, cons
     const int diffX = std::abs(inStart.row - inEnd.row);
     const int diffY = std::abs(inStart.col - inEnd.col);
 
+    if (_heuristic == Heuristic::OCTILE)
+        return HeuristicOctile(diffX, diffY);
+
     switch (_heuristic)
     {
-    case Heuristic::OCTILE:
-    {
-        return HeuristicOctile(diffX, diffY);
-    }
-
     case Heuristic::MANHATTAN:
     {
         return HeuristicManhattan(inStart, inEnd);

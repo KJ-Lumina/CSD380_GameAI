@@ -39,7 +39,7 @@ public:
 	void Reset()
 	{
 		nodeStates = NodeState::NONE;
-		//givenCost = 0.0f;
+		givenCost = 0;
 		finalCost = 0;
 	}
 

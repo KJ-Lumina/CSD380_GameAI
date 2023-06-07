@@ -219,40 +219,43 @@ void AStarPather::UpdateNodeAccessibleNeighbours(PathNode* inPathNode)
 				continue; //Skip the current node (itself)
 
             if (!terrain->is_valid_grid_position(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j })) {
-				inPathNode->setNeighbor(neighbourIndex, false);
+                inPathNode->neighbours &= ~(1 << neighbourIndex);
                 neighbourIndex++;
                 continue; //Skip the current node (itself
             }
 
+			const bool isWall = terrain->is_wall(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j });
+
+			// Set the bit at the given index to 1.
             inPathNode->setNeighbor(neighbourIndex, (!terrain->is_wall(GridPos{ inPathNode->gridPosition.row + i, inPathNode->gridPosition.col + j })) ? true : false);
 
             ++neighbourIndex;
         }
     }
 
-    if (!inPathNode->getNeighbor(1))
+    if (!(inPathNode->neighbours >> 1 & 1))
     {
-        inPathNode->setNeighbor(0, false);
-        inPathNode->setNeighbor(2, false);
+        // Set the bit at the given index to 0.
+        inPathNode->neighbours &= ~(1 << 0);
+        inPathNode->neighbours &= ~(1 << 2);
     }
 
-    if (!inPathNode->getNeighbor(3))
+    if (!(inPathNode->neighbours >> 3 & 1))
     {
-        inPathNode->setNeighbor(0, false);
-        inPathNode->setNeighbor(5, false);
+        inPathNode->neighbours &= ~(1 << 0);
+        inPathNode->neighbours &= ~(1 << 5);
     }
 
-    if (!inPathNode->getNeighbor(4))
+    if (!(inPathNode->neighbours >> 4 & 1))
     {
-        inPathNode->setNeighbor(2, false);
-        inPathNode->setNeighbor(7, false);
-
+        inPathNode->neighbours &= ~(1 << 2);
+        inPathNode->neighbours &= ~(1 << 7);
     }
 
-    if (!inPathNode->getNeighbor(6))
+    if (!(inPathNode->neighbours >> 6 & 1))
     {
-        inPathNode->setNeighbor(5, false);
-        inPathNode->setNeighbor(7, false);
+        inPathNode->neighbours &= ~(1 << 5);
+        inPathNode->neighbours &= ~(1 << 7);
     }
 }
 
@@ -263,33 +266,33 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
     
 	for(int index = 0; index < 8; ++index)
 	{
-        if (!inPathNode->getNeighbor(index))
-	        continue;
+        if (inPathNode->neighbours >> index & 1) {
 
-        GridPos gp { inPathNode->gridPosition.row + neighbourOffsets[index].row, inPathNode->gridPosition.col + neighbourOffsets[index].col };
-        PathNode* neighbour = &_grid[gp.row][gp.col];
+            GridPos gp{ inPathNode->gridPosition.row + neighbourOffsets[index].row, inPathNode->gridPosition.col + neighbourOffsets[index].col };
+            PathNode* neighbour = &_grid[gp.row][gp.col];
 
-        // Adding the given cost of the current node to the neighbour PLUS the straight cost
-        const int newGivenCost = inPathNode->givenCost + neighbourCost[index];
-        const int newFinalCost = newGivenCost + static_cast<int>(CalculateHeuristic(neighbour->gridPosition, _heuristic, _goalNode->gridPosition) * _weight);
+            // Adding the given cost of the current node to the neighbour PLUS the straight cost
+            const int newGivenCost = inPathNode->givenCost + neighbourCost[index];
+            const int newFinalCost = newGivenCost + static_cast<int>(CalculateHeuristic(neighbour->gridPosition, _heuristic, _goalNode->gridPosition) * _weight);
 
-        if (neighbour->nodeStates == 0)
-        {
-	        neighbour->parent = inPathNode;
-	        neighbour->givenCost = newGivenCost;
-	        neighbour->finalCost = newFinalCost;
-            neighbour->nodeStates = NodeState::OPEN;
+            if (neighbour->nodeStates == 0)
+            {
+                neighbour->parent = inPathNode;
+                neighbour->givenCost = newGivenCost;
+                neighbour->finalCost = newFinalCost;
+                neighbour->nodeStates = NodeState::OPEN;
 
-            _openList.Push(neighbour);
+                _openList.Push(neighbour);
 
-	        if (_debugColoring)
-		        terrain->set_color(neighbour->gridPosition, Colors::Blue);
-        }
-        else if (neighbour->nodeStates != 0 && newFinalCost < neighbour->finalCost)
-        {
-            neighbour->parent = inPathNode;
-            neighbour->givenCost = newGivenCost;
-            neighbour->finalCost = newFinalCost;
+                if (_debugColoring)
+                    terrain->set_color(neighbour->gridPosition, Colors::Blue);
+            }
+            else if (neighbour->nodeStates != 0 && newFinalCost < neighbour->finalCost)
+            {
+                neighbour->parent = inPathNode;
+                neighbour->givenCost = newGivenCost;
+                neighbour->finalCost = newFinalCost;
+            }
         }
 	}
 }
