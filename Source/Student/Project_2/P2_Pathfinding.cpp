@@ -48,8 +48,8 @@ bool AStarPather::initialize()
     Callback cb = std::bind(&AStarPather::UpdateAllNodeNeighbours, this);
     Messenger::listen_for_message(Messages::MAP_CHANGE, cb);
 
-    //Callback floydcb = std::bind(&AStarPather::FloydPathReconstruction, this);
-    //Messenger::listen_for_message(Messages::MAP_CHANGE, floydcb);
+    Callback floydcb = std::bind(&AStarPather::FloydPathReconstruction, this);
+    Messenger::listen_for_message(Messages::MAP_CHANGE, floydcb);
 
     return true; // return false if any errors actually occur, to stop engine initialization
 }
@@ -99,7 +99,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
     // Declaring the start and goal nodes
     if (request.newRequest)
     {
-		//if (request.settings.method != Method::FLOYD_WARSHALL){
+		if (request.settings.method != Method::FLOYD_WARSHALL){
 
             ResetGrid();
 
@@ -123,10 +123,8 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
             _openList.Push(&_grid[start.row][start.col]);
 
-            //_openList.push_back(&_grid[start.row][start.col]);
-            //std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
-		//}
-		/*else
+		}
+		else
         {
 		    GridPos start = terrain->get_grid_position(request.start);
 		    GridPos goal = terrain->get_grid_position(request.goal);
@@ -141,16 +139,12 @@ PathResult AStarPather::compute_path(PathRequest &request)
 		    CreateFloydPath(request.path, path);
 
 		    return PathResult::COMPLETE;
-		}*/
+		}
     }
 
     while (_openList.gridSize > 0)
     {
         _parentNode = _openList.FindCheapestNodeAndPop();
-
-		//std::pop_heap(_openList.begin(), _openList.end(), PathNodeCompare());
-  //      _parentNode = _openList.back();
-  //      _openList.pop_back();
 
         if (_parentNode == _goalNode) {
 
@@ -288,9 +282,6 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
 
             _openList.Push(neighbour);
 
-	        //_openList.push_back(neighbour);
-	        //std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
-
 	        if (_debugColoring)
 		        terrain->set_color(neighbour->gridPosition, Colors::Blue);
         }
@@ -299,7 +290,6 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
             neighbour->parent = inPathNode;
             neighbour->givenCost = newGivenCost;
             neighbour->finalCost = newFinalCost;
-            //std::make_heap(_openList.begin(), _openList.end(), PathNodeCompare());
         }
 	}
 }
@@ -650,6 +640,10 @@ bool AStarPather::Floyd_IsValidPosition(const int inStart, const int inEnd, bool
 
     return true;
 }
+
+/*************************************************************************
+ *                      Unsorted List FUNCTIONS
+ *************************************************************************/
 
 void UnsortedList::Push(PathNode* inPathNode) {
     _list[gridSize] = inPathNode;
