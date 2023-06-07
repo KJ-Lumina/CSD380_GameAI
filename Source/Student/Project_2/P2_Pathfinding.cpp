@@ -6,7 +6,7 @@
 #pragma region Extra Credit
 bool ProjectTwo::implemented_floyd_warshall()
 {
-    return false;
+    return true;
 }
 
 bool ProjectTwo::implemented_goal_bounding()
@@ -47,6 +47,9 @@ bool AStarPather::initialize()
 
     Callback cb = std::bind(&AStarPather::UpdateAllNodeNeighbours, this);
     Messenger::listen_for_message(Messages::MAP_CHANGE, cb);
+
+    Callback floydcb = std::bind(&AStarPather::FloydPathReconstruction, this);
+    Messenger::listen_for_message(Messages::MAP_CHANGE, floydcb);
 
     return true; // return false if any errors actually occur, to stop engine initialization
 }
@@ -96,27 +99,46 @@ PathResult AStarPather::compute_path(PathRequest &request)
     // Declaring the start and goal nodes
     if (request.newRequest)
     {
-        ResetGrid();
+        if (request.settings.method == Method::ASTAR) {
 
-		GridPos start = terrain->get_grid_position(request.start);
-		GridPos goal = terrain->get_grid_position(request.goal);
+            ResetGrid();
 
-		//Clear the open and closed lists
-	    _openList.clear();
+            GridPos start = terrain->get_grid_position(request.start);
+            GridPos goal = terrain->get_grid_position(request.goal);
 
-        _heuristic = request.settings.heuristic; // Setting the current heuristic for this request
-		_debugColoring = request.settings.debugColoring; // Setting the current debug coloring for this request
-		_weight = request.settings.weight; // Setting the current weight for this request
-		_singleStep = request.settings.singleStep; // Setting the current single step for this request
+            //Clear the open and closed lists
+            _openList.clear();
 
-		_goalNode = &_grid[goal.row][goal.col];
+            _heuristic = request.settings.heuristic; // Setting the current heuristic for this request
+            _debugColoring = request.settings.debugColoring; // Setting the current debug coloring for this request
+            _weight = request.settings.weight; // Setting the current weight for this request
+            _singleStep = request.settings.singleStep; // Setting the current single step for this request
 
-		//Pushing the start node onto the open list
-		PathNode& startNode = _grid[start.row][start.col];
-        startNode.parent = nullptr;
-        startNode.nodeStates = NodeState::OPEN;
-		_openList.push_back(&_grid[start.row][start.col]);
-        std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
+            _goalNode = &_grid[goal.row][goal.col];
+
+            //Pushing the start node onto the open list
+            PathNode& startNode = _grid[start.row][start.col];
+            startNode.parent = nullptr;
+            startNode.nodeStates = NodeState::OPEN;
+            _openList.push_back(&_grid[start.row][start.col]);
+            std::push_heap(_openList.begin(), _openList.end(), PathNodeCompare());
+        }
+    	else if(request.settings.method == Method::FLOYD_WARSHALL)
+        {
+            GridPos start = terrain->get_grid_position(request.start);
+            GridPos goal = terrain->get_grid_position(request.goal);
+
+            const std::vector<int> path = Floyd_GetPath(start, goal);
+
+            if(path.empty())
+            {
+                return PathResult::IMPOSSIBLE;
+            }
+
+            CreateFloydPath(request.path, path);
+
+            return PathResult::COMPLETE;
+        }
     }
 
     while (!_openList.empty())
@@ -457,4 +479,167 @@ void AStarPather::ResetGrid()
             node.Reset();
 	    }
     }
+}
+
+void AStarPather::FloydPathReconstruction()
+{
+    //Initialize the values
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < V; ++j) {
+            distance[i][j] = INF;
+            previous[i][j] = -1;
+        }
+    }
+
+    //Update the costs
+    for (int u = 0; u < V; ++u) {
+        for (int v = 0; v < V; ++v) {
+            if (u == v) {
+                distance[u][v] = 0; // Distance from a node to itself is 0
+                previous[u][v] = v;
+            }
+
+			// If there is an edge between u and v, then distance is 1
+            bool isDiagonalNeighbour = false;
+            if(Floyd_IsValidPosition(u, v, isDiagonalNeighbour))
+            {
+	            if(isDiagonalNeighbour)
+	            {
+                    distance[u][v] = NODE_DIAGONAL_COST;
+	            }
+            	else
+	            {
+                    distance[u][v] = NODE_STRAIGHT_COST;
+	            }
+                previous[u][v] = u;
+            }
+        }
+    }
+
+    for (int k = 0; k < V; k++) {
+        for (int i = 0; i < V; i++) {
+            for (int j = 0; j < V; j++) {
+                if (distance[i][j] > distance[i][k] + distance[k][j]) {
+                    distance[i][j] = distance[i][k] + distance[k][j];
+                    previous[i][j] = previous[k][j];
+                }
+            }
+        }
+    }
+}
+
+bool AStarPather::Floyd_IsNeighbour(GridPos& inStart, GridPos& inEnd, bool& outIsDiagonal)
+{
+    int x1 = inStart.row;
+    int y1 = inStart.col;
+    int x2 = inEnd.row;
+    int y2 = inEnd.col;
+
+    // Check if they are direct neighbors
+    bool directNeighbor = ((x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1));
+
+    // Check if they are diagonal neighbors
+    bool diagonalNeighbor = (abs(x1 - x2) == 1 && abs(y1 - y2) == 1);
+
+    outIsDiagonal = diagonalNeighbor;
+
+    return directNeighbor || diagonalNeighbor;
+}
+
+std::vector<int> AStarPather::Floyd_GetPath(GridPos& inStart, GridPos& inEnd)
+{
+    int start = inStart.row * 40 + inStart.col;
+    int end = inEnd.row * 40 + inEnd.col;
+
+    if (previous[start][end] == -1) {
+        return std::vector<int>();  // Empty path
+    }
+    std::vector<int> path;
+    path.push_back(end);
+    int u = start, v = end;
+    while (u != v) {
+        v = previous[u][v];
+        path.insert(path.begin(), v);
+    }
+    return path;
+}
+
+void AStarPather::CreateFloydPath(WaypointList& inPath, const std::vector<int>& inPathIndices)
+{
+    for(auto& index : inPathIndices){
+        GridPos pos{ index / 40, index % 40 };
+        inPath.emplace_back(terrain->get_world_position(pos));
+    }
+}
+
+bool AStarPather::Floyd_IsValidPosition(const int inStart, const int inEnd, bool& outIsDiagonal)
+{
+    const int x1 = inStart / GRID_HEIGHT;
+    const int y1 = inStart % GRID_WIDTH;
+    const int x2 = inEnd / GRID_HEIGHT;
+    const int y2 = inEnd % GRID_WIDTH;
+
+	GridPos start{ x1, y1 };
+	GridPos end{ x2, y2 };
+
+	bool isNeighbour = Floyd_IsNeighbour(start, end, outIsDiagonal);
+
+	if (!isNeighbour)
+	{
+		return false;
+	}
+
+	if (!terrain->is_valid_grid_position(end) || terrain->is_wall(end))
+	{
+		return false;
+	}
+
+    // Check for Diagonal Correctness
+    if(outIsDiagonal)
+    {
+        if (x2 > x1)
+        {
+            if (y2 > y1)
+            {
+                GridPos bottom{ x1, y1 + 1 };
+                GridPos right{ x1 + 1, y1 };
+                if (!terrain->is_valid_grid_position(bottom) || terrain->is_wall(bottom) || !terrain->is_valid_grid_position(right) || terrain->is_wall(right))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                GridPos top{ x1, y1 - 1 };
+                GridPos right{ x1 + 1, y1 };
+                if (!terrain->is_valid_grid_position(top) || terrain->is_wall(top) || !terrain->is_valid_grid_position(right) || terrain->is_wall(right))
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            if (y2 > y1)
+            {
+                GridPos bottom{ x1, y1 + 1 };
+                GridPos left{ x1 - 1, y1 };
+                if (!terrain->is_valid_grid_position(bottom) || terrain->is_wall(bottom) || !terrain->is_valid_grid_position(left) || terrain->is_wall(left))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                GridPos top{ x1, y1 - 1 };
+                GridPos left{ x1 - 1, y1 };
+                if (!terrain->is_valid_grid_position(top) || terrain->is_wall(top) || !terrain->is_valid_grid_position(left) || terrain->is_wall(left))
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
 }

@@ -9,7 +9,7 @@ constexpr int SQRT_2 = 14124;
 constexpr int NODE_DIAGONAL_COST = SQRT_2;
 constexpr int NODE_STRAIGHT_COST = 10000;
 constexpr int OCTILE_MIN = NODE_DIAGONAL_COST - NODE_STRAIGHT_COST;
-constexpr float INF = 1000000.0f;
+constexpr int INF = 1000000;
 
 constexpr int cfmin(const int a, const int b) {
     return (a < b) ? a : b;
@@ -114,6 +114,8 @@ constexpr std::array<int, 8> neighbourCost
     NODE_DIAGONAL_COST
 };
 
+constexpr int V = 1600;
+
 using Grid = std::array<std::array<PathNode, GRID_WIDTH>, GRID_HEIGHT>;
 
 struct PathNodeCompare
@@ -158,6 +160,10 @@ private:
     bool _debugColoring{ false };
     bool _singleStep{ false };
 
+    //Floyd Warshall Variables
+    int distance[V][V]{};
+    int previous[V][V]{}; //tracking the previous Index 
+
 	// Pathfinding Functions
     void UpdateAllNodeNeighbours();
 	void UpdateNodeAccessibleNeighbours(PathNode* inPathNode);
@@ -169,10 +175,14 @@ private:
 
 	void RubberBandPath(WaypointList& inPath);
     bool IsNodeDeletable(const GridPos& inCurrent ,const GridPos& inStart, const GridPos& inEnd);
-
 	void SmoothPath(WaypointList& inPath);
-
 	float GridPosDistance(const GridPos& inStart, const GridPos& inEnd);
-
     void AddBackNodes(WaypointList& inPath);
+
+    //Floyd Path Reconstruction
+    void FloydPathReconstruction();
+	bool Floyd_IsNeighbour(GridPos& inStart, GridPos& inEnd, bool& outIsDiagonal);
+	std::vector<int> Floyd_GetPath(GridPos& inStart, GridPos& inEnd);
+	void CreateFloydPath(WaypointList& inPath, const std::vector<int>& inPathIndices);
+    bool Floyd_IsValidPosition(const int inStart, const int inEnd, bool& outIsDiagonal);
 };
