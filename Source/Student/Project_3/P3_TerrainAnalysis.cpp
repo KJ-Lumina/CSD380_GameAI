@@ -12,6 +12,57 @@ bool ProjectThree::implemented_fog_of_war() const // extra credit
     return false;
 }
 
+float GridPosDistance(const GridPos& inStart, const GridPos& inEnd)
+{
+	return sqrtf(static_cast<float>((inStart.row - inEnd.row) * (inStart.row - inEnd.row) + (inStart.col - inEnd.col) * (inStart.col - inEnd.col)));
+}
+
+bool isDiagonalWalkable(int inStartRow, int inStartCol ,int inNeighborRow, int inNeighborCol)
+{
+	//Determine which direction the neighbor is in relation to the start
+	if (inNeighborRow < inStartRow)
+	{
+		if (inNeighborCol < inStartCol)
+		{
+			//Northwest
+			if (terrain->is_wall(GridPos{ inStartRow - 1, inStartCol }) || terrain->is_wall(GridPos{ inStartRow, inStartCol - 1 }))
+			{
+				return false;
+			}
+		}
+		else if (inNeighborCol > inStartCol)
+		{
+			//Northeast
+			if (terrain->is_wall(GridPos{ inStartRow - 1, inStartCol }) || terrain->is_wall(GridPos{ inStartRow, inStartCol + 1 }))
+			{
+				return false;
+			}
+		}
+	}
+	else if (inNeighborRow > inStartRow)
+	{
+		if (inNeighborCol < inStartCol)
+		{
+			//Southwest
+			if (terrain->is_wall(GridPos{ inStartRow + 1, inStartCol }) || terrain->is_wall(GridPos{ inStartRow, inStartCol - 1 }))
+			{
+				return false;
+			}
+		}
+		else if (inNeighborCol > inStartCol)
+		{
+			//Southeast
+			if (terrain->is_wall(GridPos{ inStartRow + 1, inStartCol }) || terrain->is_wall(GridPos{ inStartRow, inStartCol + 1 }))
+			{
+				return false;
+			}
+		}
+	}
+
+    return true;
+}
+
+
 float distance_to_closest_wall(int row, int col)
 {
     /*
@@ -22,9 +73,27 @@ float distance_to_closest_wall(int row, int col)
         and a wall, respectively.
     */
 
+    std::vector<float> walls;
+    const GridPos currentPos{ row, col };
+
     // WRITE YOUR CODE HERE
+    for(int i = -1; i < terrain->get_map_height() + 1; ++i)
+    {
+	    for(int j = -1; j < terrain->get_map_width() + 1; ++j)
+	    {
+			GridPos pos { i,j };
+
+            if(!terrain->is_valid_grid_position(pos) || terrain->is_wall(pos))
+            {
+                float distance = GridPosDistance(pos, currentPos);
+				walls.push_back(distance);
+            }
+	    }
+    }
+
+	std::sort(walls.begin(), walls.end());
     
-    return 0.0f; // REPLACE THIS
+    return walls.front(); // REPLACE THIS
 }
 
 bool is_clear_path(int row0, int col0, int row1, int col1)
@@ -40,7 +109,65 @@ bool is_clear_path(int row0, int col0, int row1, int col1)
 
     // WRITE YOUR CODE HERE
 
-    return false; // REPLACE THIS
+	// Determine the bounding box of the two points TODO: Find out how to use this
+    int min_row = std::min(row0, row1);
+    int max_row = std::max(row0, row1);
+    int min_col = std::min(col0, col1);
+    int max_col = std::max(col0, col1);
+
+    Vec3 x = terrain->get_world_position({ 1,0 });
+    Vec3 y = terrain->get_world_position({ 0,0 });
+
+	const float worldPosUnitDistance = Vec2::Distance({ x.x, x.z }, { y.x, y.z });
+
+	Vec3 worldPos0 = terrain->get_world_position({ row0, col0 });
+	Vec3 worldPos1 = terrain->get_world_position({ row1, col1 });
+
+	const Line line1{ { worldPos0.x, worldPos0.z }, { worldPos1.x,worldPos1.z } };
+
+    for(int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+            if (terrain->is_wall({ i,j }))
+            {
+                // Find the four corners of the wall
+				const Vec3 wallWorldPos = terrain->get_world_position({ i,j });
+
+				Vec2 topLeft{ wallWorldPos.x - worldPosUnitDistance / 2.0f , wallWorldPos.z + worldPosUnitDistance / 2.0f };
+				Vec2 bottomLeft{ wallWorldPos.x - worldPosUnitDistance / 2.0f, wallWorldPos.z - worldPosUnitDistance / 2.0f };
+				Vec2 topRight{ wallWorldPos.x + worldPosUnitDistance / 2.0f, wallWorldPos.z + worldPosUnitDistance / 2.0f };
+				Vec2 bottomRight{ wallWorldPos.x + worldPosUnitDistance / 2.0f, wallWorldPos.z - worldPosUnitDistance / 2.0f };
+
+				if (line_intersect(line1.p0, line1.p1, topLeft, bottomLeft ) || line_intersect(line1.p0, line1.p1, bottomLeft, bottomRight) 
+                    || line_intersect(line1.p0, line1.p1, bottomRight, topRight) || line_intersect(line1.p0, line1.p1, topRight, topLeft))
+				{
+					return false;
+				}
+            }
+        }
+    }
+
+    return true;
+}
+
+int ComputeNumberOfVisibleCells(int row, int col)
+{
+    int count = 0;
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+            if (i == row && j == col)
+                continue;
+
+            if(is_clear_path(row, col, i, j))
+            {
+                ++count;
+            }
+        }
+    }
+    return count;
 }
 
 void analyze_openness(MapLayer<float> &layer)
@@ -52,6 +179,18 @@ void analyze_openness(MapLayer<float> &layer)
     */
 
     // WRITE YOUR CODE HERE
+
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+			if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
+				continue;
+
+            const float dist = distance_to_closest_wall(i, j);
+            layer.set_value(GridPos{ i,j }, 1/ (dist * dist));
+        }
+    }
 }
 
 void analyze_visibility(MapLayer<float> &layer)
@@ -67,6 +206,18 @@ void analyze_visibility(MapLayer<float> &layer)
     */
 
     // WRITE YOUR CODE HERE
+
+    for(int i = 0; i < terrain->get_map_height(); ++i)
+    {
+	    for(int j = 0; j < terrain->get_map_width(); ++j)
+	    {
+			if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
+				continue;
+
+            int count = ComputeNumberOfVisibleCells(i, j);
+			layer.set_value(GridPos{ i,j }, std::min(1.0f, static_cast<float>(count) / 160.0f));
+	    }
+    }
 }
 
 void analyze_visible_to_cell(MapLayer<float> &layer, int row, int col)
@@ -82,6 +233,61 @@ void analyze_visible_to_cell(MapLayer<float> &layer, int row, int col)
     */
 
     // WRITE YOUR CODE HERE
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+			if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
+				continue;
+
+			if (is_clear_path(row, col, i, j))
+			{
+				layer.set_value(GridPos{ i,j }, 1.0f);
+			}
+        	else
+			{
+                layer.set_value(GridPos{ i,j }, 0.0f);
+			}
+        }
+    }
+
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+			if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
+				continue;
+
+            if(layer.get_value(GridPos{i,j}) >= 1.0f)
+            {
+				//Get surrounding cells
+				for (int k = -1; k <= 1; ++k)
+				{
+					for (int l = -1; l <= 1; ++l)
+					{
+						if (k == 0 && l == 0)
+							continue;
+
+						if (!terrain->is_valid_grid_position({ i + k, j + l }) || terrain->is_wall({ i + k, j + l }))
+							continue;
+
+						const bool diagonalNeighbor = (abs(k) == 1 && abs(l) == 1);
+                        bool isWalkable = true;
+
+                        if(diagonalNeighbor)
+                        {
+                            isWalkable = isDiagonalWalkable(i, j, i + k, j + l);
+                        }
+
+						if (isWalkable && layer.get_value(GridPos{ i + k, j + l }) == 0.0f)
+						{
+							layer.set_value(GridPos{ i + k, j + l }, 0.5f);
+						}
+					}
+				}
+            }
+        }
+    }
 }
 
 void analyze_agent_vision(MapLayer<float> &layer, const Agent *agent)

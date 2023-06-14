@@ -50,7 +50,7 @@ inline int HeuristicInconsistent(const GridPos& inStart, const GridPos& inEnd)
 {
     const int diffX = std::abs(inStart.row - inEnd.row);
     const int diffY = std::abs(inStart.col - inEnd.col);
-    return ((inStart.row + inStart.col % 2) > 0) ? HeuristicEuclidean(inStart,inEnd) : 0;
+    return ((inStart.row + inStart.col) % 2 > 0) ? HeuristicEuclidean(inStart,inEnd) : 0;
 }
 
 inline int CalculateHeuristic(const GridPos& inStart, Heuristic _heuristic, const GridPos& inEnd)
