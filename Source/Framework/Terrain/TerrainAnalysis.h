@@ -35,6 +35,7 @@ void propagate_dual_occupancy(MapLayer<float>& layer, float decay, float growth)
 void normalize_solo_occupancy(MapLayer<float>& layer);
 void normalize_dual_occupancy(MapLayer<float>& layer);
 
+float ApplyDecayFromNeighbors(int row, int col, float decay, MapLayer<float>& layer);
 bool isDiagonalWalkable(int inStartRow, int inStartCol, int inNeighborRow, int inNeighborColl);
 int ComputeNumberOfVisibleCells(int row, int col);
 float GridPosDistance(const GridPos& inStart, const GridPos& inEnd);

@@ -62,6 +62,26 @@ bool isDiagonalWalkable(int inStartRow, int inStartCol ,int inNeighborRow, int i
     return true;
 }
 
+float ApplyDecayFromNeighbors(int row, int col, float decay, MapLayer<float>& layer)
+{
+    float result = -FLT_MAX;
+	float originalValue = layer.get_value(row, col);
+	for (int i = -1; i < 2; ++i)
+	{
+		for (int j = -1; j < 2; ++j)
+		{
+			GridPos pos{ row + i, col + j };
+
+			if (terrain->is_valid_grid_position(pos) && terrain->is_wall(pos))
+			{
+                float newValue = originalValue * expf(-1 * decay);
+                result = std::max(result, newValue);
+			}
+		}
+	}
+
+	return result;
+}
 
 float distance_to_closest_wall(int row, int col)
 {
@@ -360,6 +380,27 @@ void propagate_solo_occupancy(MapLayer<float> &layer, float decay, float growth)
     */
     
     // WRITE YOUR CODE HERE
+
+    std::array<std::array<float, 40>, 40> tempLayer;
+
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+            float currentValue = layer.get_value(i, j);
+            float highestValue = ApplyDecayFromNeighbors(i, j, decay, layer);
+            float lerpResult = lerp(currentValue, highestValue, growth);
+            tempLayer[i][j] = lerpResult;
+        }
+    }
+
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+            layer.set_value(i, j, tempLayer[i][j]);
+        }
+    }
 }
 
 void propagate_dual_occupancy(MapLayer<float> &layer, float decay, float growth)
