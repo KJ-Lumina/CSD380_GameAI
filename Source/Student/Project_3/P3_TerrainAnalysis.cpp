@@ -311,6 +311,36 @@ void analyze_agent_vision(MapLayer<float> &layer, const Agent *agent)
     */
 
     // WRITE YOUR CODE HERE
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+            if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
+                continue;
+
+            bool isVisible = true;
+
+			Vec2 viewVector = Vec2{ agent->get_forward_vector().x, agent->get_forward_vector().z };
+            Vec2 cellPos = Vec2{ terrain->get_world_position(GridPos{ i,j}).x, terrain->get_world_position(GridPos{ i,j }).z };
+			Vec2 agentPos = Vec2{ agent->get_position().x, agent->get_position().z };
+			Vec2 cellToAgent = agentPos - cellPos;
+			cellToAgent.Normalize();
+			GridPos agentGridPos = terrain->get_grid_position(agent->get_position());
+
+			float dotProduct = viewVector.Dot(cellToAgent);
+			float cosAngle = dotProduct / (viewVector.Length() * cellToAgent.Length());
+
+            //Change Visibility to false if its 180 degree behind the agent
+            if (cosAngle >= 0) {
+                isVisible = false;
+            }
+
+            if (isVisible && is_clear_path(agentGridPos.row, agentGridPos.col, i, j))
+            {
+                layer.set_value(GridPos{ i,j }, 1.0f);
+            }
+        }
+    }
 }
 
 void propagate_solo_occupancy(MapLayer<float> &layer, float decay, float growth)
