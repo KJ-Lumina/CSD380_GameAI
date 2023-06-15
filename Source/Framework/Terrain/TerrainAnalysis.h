@@ -18,6 +18,12 @@ class Agent;
 template <typename T>
 class MapLayer;
 
+enum class PropagationType
+{
+	Solo,
+	Dual
+};
+
 struct Line
 {
 	Vec2 p0;
@@ -35,7 +41,7 @@ void propagate_dual_occupancy(MapLayer<float>& layer, float decay, float growth)
 void normalize_solo_occupancy(MapLayer<float>& layer);
 void normalize_dual_occupancy(MapLayer<float>& layer);
 
-float ApplyDecayFromNeighbors(int row, int col, float decay, MapLayer<float>& layer);
+float ApplyDecayFromNeighbors(int row, int col, float decay, MapLayer<float>& layer, PropagationType inType = PropagationType::Solo);
 bool isDiagonalWalkable(int inStartRow, int inStartCol, int inNeighborRow, int inNeighborColl);
 int ComputeNumberOfVisibleCells(int row, int col);
 float GridPosDistance(const GridPos& inStart, const GridPos& inEnd);

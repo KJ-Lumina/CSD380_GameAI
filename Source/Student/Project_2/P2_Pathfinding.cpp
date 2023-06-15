@@ -123,6 +123,9 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
             _openList.Push(&_grid[start.row][start.col]);
 
+            if (_debugColoring)
+                terrain->set_color(GridPos{ start.row,start.col }, Colors::Blue);
+
 		}
 		else
         {
@@ -287,7 +290,19 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                 if (_debugColoring)
                     terrain->set_color(neighbour->gridPosition, Colors::Blue);
             }
-            else if (neighbour->nodeStates != 0 && newFinalCost < neighbour->finalCost)
+			else if (neighbour->nodeStates == NodeState::CLOSED && newFinalCost < neighbour->finalCost)
+			{
+				neighbour->parent = inPathNode;
+				neighbour->givenCost = newGivenCost;
+				neighbour->finalCost = newFinalCost;
+				neighbour->nodeStates = NodeState::OPEN;
+
+				_openList.Push(neighbour);
+
+				if (_debugColoring)
+					terrain->set_color(neighbour->gridPosition, Colors::Blue);
+			}
+            else if (neighbour->nodeStates == NodeState::OPEN && newFinalCost < neighbour->finalCost)
             {
                 neighbour->parent = inPathNode;
                 neighbour->givenCost = newGivenCost;

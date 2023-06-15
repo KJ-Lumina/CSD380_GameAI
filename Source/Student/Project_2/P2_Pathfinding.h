@@ -48,8 +48,6 @@ inline int HeuristicEuclidean(const GridPos& inStart, const GridPos& inEnd)
 
 inline int HeuristicInconsistent(const GridPos& inStart, const GridPos& inEnd) //TODO : FIX THIS ASAP 
 {
-    const int diffX = std::abs(inStart.row - inEnd.row);
-    const int diffY = std::abs(inStart.col - inEnd.col);
     return ((inStart.row + inStart.col) % 2 > 0) ? HeuristicEuclidean(inStart,inEnd) : 0;
 }
 
