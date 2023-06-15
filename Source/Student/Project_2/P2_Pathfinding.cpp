@@ -48,8 +48,8 @@ bool AStarPather::initialize()
     Callback cb = std::bind(&AStarPather::UpdateAllNodeNeighbours, this);
     Messenger::listen_for_message(Messages::MAP_CHANGE, cb);
 
-    //Callback floydcb = std::bind(&AStarPather::FloydPathReconstruction, this);
-    //Messenger::listen_for_message(Messages::MAP_CHANGE, floydcb);
+    Callback floydcb = std::bind(&AStarPather::FloydPathReconstruction, this);
+    Messenger::listen_for_message(Messages::MAP_CHANGE, floydcb);
 
     return true; // return false if any errors actually occur, to stop engine initialization
 }
@@ -278,7 +278,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
             const int newGivenCost = inPathNode->givenCost + neighbourCost[index];
             const int newFinalCost = newGivenCost + static_cast<int>(CalculateHeuristic(neighbour->gridPosition, _heuristic, _goalNode->gridPosition) * _weight);
 
-            if (neighbour->nodeStates == 0)
+            if (neighbour->nodeStates == 0 || (neighbour->nodeStates == NodeState::CLOSED && newFinalCost < neighbour->finalCost))
             {
                 neighbour->parent = inPathNode;
                 neighbour->givenCost = newGivenCost;
@@ -290,19 +290,7 @@ void AStarPather::AddAllNeighboursToOpenList(PathNode* inPathNode)
                 if (_debugColoring)
                     terrain->set_color(neighbour->gridPosition, Colors::Blue);
             }
-			else if (neighbour->nodeStates == NodeState::CLOSED && newFinalCost < neighbour->finalCost)
-			{
-				neighbour->parent = inPathNode;
-				neighbour->givenCost = newGivenCost;
-				neighbour->finalCost = newFinalCost;
-				neighbour->nodeStates = NodeState::OPEN;
-
-				_openList.Push(neighbour);
-
-				if (_debugColoring)
-					terrain->set_color(neighbour->gridPosition, Colors::Blue);
-			}
-            else if (neighbour->nodeStates == NodeState::OPEN && newFinalCost < neighbour->finalCost)
+            else if (newFinalCost < neighbour->finalCost)
             {
                 neighbour->parent = inPathNode;
                 neighbour->givenCost = newGivenCost;

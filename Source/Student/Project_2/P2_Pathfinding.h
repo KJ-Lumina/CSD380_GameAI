@@ -43,12 +43,17 @@ inline int HeuristicEuclidean(const GridPos& inStart, const GridPos& inEnd)
 {
     const int diffX = std::abs(inStart.row - inEnd.row);
     const int diffY = std::abs(inStart.col - inEnd.col);
-	return static_cast<int>(sqrtf(static_cast<float>(diffX * diffX + diffY * diffY)));
+    return static_cast<int>(sqrt(diffX * diffX + diffY * diffY) * NODE_STRAIGHT_COST);
 }
 
 inline int HeuristicInconsistent(const GridPos& inStart, const GridPos& inEnd) //TODO : FIX THIS ASAP 
 {
-    return ((inStart.row + inStart.col) % 2 > 0) ? HeuristicEuclidean(inStart,inEnd) : 0;
+    if((inStart.row + inStart.col) % 2 > 0)
+    {
+        return HeuristicEuclidean(inStart, inEnd);
+    }
+
+    return 0;
 }
 
 inline int CalculateHeuristic(const GridPos& inStart, Heuristic _heuristic, const GridPos& inEnd)
@@ -126,7 +131,7 @@ struct PathNodeCompare
 class UnsortedList
 {
 public:
-    std::array<PathNode*, 158> _list{};
+    std::array<PathNode*, 512> _list{};
     int gridSize = 0;
 
     void Push(PathNode* inPathNode);
