@@ -62,21 +62,26 @@ bool isDiagonalWalkable(int inStartRow, int inStartCol ,int inNeighborRow, int i
     return true;
 }
 
-float ApplyDecayFromNeighbors(int row, int col, float decay, MapLayer<float>& layer, PropagationType inType)
+float ApplyDecayFromNeighbors(int row, int col, float decay, MapLayer<float>& layer)
 {
     float result = -FLT_MAX;
 	for (int i = -1; i < 2; ++i)
 	{
 		for (int j = -1; j < 2; ++j)
 		{
+			if (i == 0 && j == 0)
+				continue;
+
 			GridPos pos{ row + i, col + j };
 
             if (!terrain->is_valid_grid_position(pos) || terrain->is_wall(pos))
                 continue;
-			
-            float newValue = layer.get_value(row + i, col + j) * expf(-1 * decay);
 
 			const bool diagonalNeighbor = (i != 0 && j != 0);
+
+            float distance = (diagonalNeighbor) ? sqrtf(2) : 1.0f;
+            float newValue = layer.get_value(row + i, col + j) * expf(-distance * decay);
+
             bool isAccessible  = true;
 
             if (diagonalNeighbor)
@@ -85,15 +90,32 @@ float ApplyDecayFromNeighbors(int row, int col, float decay, MapLayer<float>& la
             }
 
             if (isAccessible) {
-                if (inType == PropagationType::Dual)
-                    newValue = std::abs(newValue);
-
                 result = std::max(result, newValue);
             }
 		}
 	}
 
 	return result;
+}
+
+bool isCellinFOV(const int targetRow, const int targetCol, const Vec2& inViewVector, const Vec2& inAgentPos, const float inFOVAngle)
+{
+    const Vec2 cellPos = Vec2{ terrain->get_world_position(GridPos{ targetRow,targetCol}).x, terrain->get_world_position(GridPos{ targetRow,targetCol }).z };
+    Vec2 cellToAgent = inAgentPos - cellPos;
+    cellToAgent.Normalize();
+
+    const float dotProduct = inViewVector.Dot(cellToAgent);
+    const float cosAngle = dotProduct / (inViewVector.Length() * cellToAgent.Length());
+
+	//Convert to radians
+	const float RadAngle = (inFOVAngle / 2.0f) * (PI / 180);
+
+    //Change Visibility to false if its 180 degree behind the agent
+	if (cosAngle >= cosf(RadAngle)){
+        return false;
+    }
+
+    return true;
 }
 
 float distance_to_closest_wall(int row, int col)
@@ -142,7 +164,7 @@ bool is_clear_path(int row0, int col0, int row1, int col1)
 
     // WRITE YOUR CODE HERE
 
-	// Determine the bounding box of the two points TODO: Find out how to use this
+	// Determine the bounding box of the two points
     int min_row = std::min(row0, row1);
     int max_row = std::max(row0, row1);
     int min_col = std::min(col0, col1);
@@ -158,9 +180,9 @@ bool is_clear_path(int row0, int col0, int row1, int col1)
 
 	const Line line1{ { worldPos0.x, worldPos0.z }, { worldPos1.x,worldPos1.z } };
 
-    for(int i = 0; i < terrain->get_map_height(); ++i)
+    for(int i = min_row; i <= max_row; ++i)
     {
-        for (int j = 0; j < terrain->get_map_width(); ++j)
+        for (int j = min_col; j <= max_col; ++j)
         {
             if (terrain->is_wall({ i,j }))
             {
@@ -351,22 +373,10 @@ void analyze_agent_vision(MapLayer<float> &layer, const Agent *agent)
             if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
                 continue;
 
-            bool isVisible = true;
-
-			Vec2 viewVector = Vec2{ agent->get_forward_vector().x, agent->get_forward_vector().z };
-            Vec2 cellPos = Vec2{ terrain->get_world_position(GridPos{ i,j}).x, terrain->get_world_position(GridPos{ i,j }).z };
-			Vec2 agentPos = Vec2{ agent->get_position().x, agent->get_position().z };
-			Vec2 cellToAgent = agentPos - cellPos;
-			cellToAgent.Normalize();
-			GridPos agentGridPos = terrain->get_grid_position(agent->get_position());
-
-			float dotProduct = viewVector.Dot(cellToAgent);
-			float cosAngle = dotProduct / (viewVector.Length() * cellToAgent.Length());
-
-            //Change Visibility to false if its 180 degree behind the agent
-            if (cosAngle >= 0) {
-                isVisible = false;
-            }
+            const GridPos agentGridPos = terrain->get_grid_position(agent->get_position());
+            const Vec2 viewVector = Vec2{ agent->get_forward_vector().x, agent->get_forward_vector().z };
+            const Vec2 agentPos = Vec2{ agent->get_position().x, agent->get_position().z };
+			const bool isVisible = isCellinFOV(i, j, viewVector, agentPos, 180);
 
             if (isVisible && is_clear_path(agentGridPos.row, agentGridPos.col, i, j))
             {
@@ -441,33 +451,6 @@ void propagate_dual_occupancy(MapLayer<float> &layer, float decay, float growth)
     */
 
     // WRITE YOUR CODE HERE
-
-    std::array<std::array<float, 40>, 40> tempLayer;
-
-    for (int i = 0; i < terrain->get_map_height(); ++i)
-    {
-        for (int j = 0; j < terrain->get_map_width(); ++j)
-        {
-            if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
-                continue;
-
-            const float currentValue = layer.get_value(i, j);
-			const float highestValue = ApplyDecayFromNeighbors(i, j, decay, layer, PropagationType::Dual);
-            const float lerpResult = lerp(currentValue, highestValue, growth);
-            tempLayer[i][j] = lerpResult;
-        }
-    }
-
-    for (int i = 0; i < terrain->get_map_height(); ++i)
-    {
-        for (int j = 0; j < terrain->get_map_width(); ++j)
-        {
-            if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
-                continue;
-
-            layer.set_value(i, j, tempLayer[i][j]);
-        }
-    }
 }
 
 void normalize_solo_occupancy(MapLayer<float> &layer)
@@ -484,6 +467,9 @@ void normalize_solo_occupancy(MapLayer<float> &layer)
     {
         for (int j = 0; j < terrain->get_map_width(); ++j)
         {
+			if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
+                continue;
+
 			max = std::max(max, layer.get_value(i, j));
         }
     }
@@ -492,7 +478,11 @@ void normalize_solo_occupancy(MapLayer<float> &layer)
     {
         for (int j = 0; j < terrain->get_map_width(); ++j)
         {
-			layer.set_value(i, j, layer.get_value(i, j) / max);
+            if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
+                continue;
+
+			if (layer.get_value(i, j) > 0)
+                layer.set_value(i, j, layer.get_value(i, j) / max);
         }
     }
 }
@@ -529,6 +519,48 @@ void enemy_field_of_view(MapLayer<float> &layer, float fovAngle, float closeDist
     */
 
     // WRITE YOUR CODE HERE
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+            //Settting negative values to 0
+            if (layer.get_value(i, j) < 0.0f)
+                layer.set_value(i, j, 0.0f);
+        }
+    }
+
+    for(int i = 0; i < terrain->get_map_height(); ++i)
+    {
+		for (int j = 0; j < terrain->get_map_width(); ++j)
+		{
+			if (!terrain->is_valid_grid_position({ i,j }) || terrain->is_wall({ i,j }))
+				continue;
+
+            const GridPos agentGridPos = terrain->get_grid_position(enemy->get_position());
+
+            const Vec2 cellPos = Vec2{ terrain->get_world_position(i, j).x, terrain->get_world_position(i, j).z };
+            const Vec2 agentPos = Vec2{ enemy->get_position().x, enemy->get_position().z };
+
+            if (Vec2::Distance(agentPos, cellPos) < closeDistance)
+            {
+				const bool isClearPath = is_clear_path(agentGridPos.row,agentGridPos.col, i, j);
+
+                if (isClearPath)
+                    layer.set_value(i, j, occupancyValue);
+            }
+			else
+            {
+                
+                const Vec2 viewVector = Vec2{ enemy->get_forward_vector().x, enemy->get_forward_vector().z };
+
+                const bool isClearPath = is_clear_path(agentGridPos.row, agentGridPos.col, i, j);
+                const bool isVisible = isCellinFOV(i, j, viewVector, agentPos, fovAngle);
+
+                if (isVisible && isClearPath)
+                    layer.set_value(i, j, occupancyValue);
+            }
+		}
+    }
 }
 
 bool enemy_find_player(MapLayer<float> &layer, AStarAgent *enemy, Agent *player)
@@ -547,6 +579,7 @@ bool enemy_find_player(MapLayer<float> &layer, AStarAgent *enemy, Agent *player)
     {
         if (layer.get_value(playerGridPos) < 0.0f)
         {
+            std::cout << " Found Player " << std::endl;
             return true;
         }
     }
@@ -570,5 +603,48 @@ bool enemy_seek_player(MapLayer<float> &layer, AStarAgent *enemy)
 
     // WRITE YOUR CODE HERE
 
-    return false; // REPLACE THIS
+	float cellHighestValue = -FLT_MAX;
+	std::vector<GridPos> highestValueCells;
+
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+            cellHighestValue  = std::max(cellHighestValue, layer.get_value(i, j));
+        }
+    }
+
+    for (int i = 0; i < terrain->get_map_height(); ++i)
+    {
+        for (int j = 0; j < terrain->get_map_width(); ++j)
+        {
+			if (layer.get_value(i, j) == cellHighestValue)
+			{
+				highestValueCells.push_back({ i,j });
+			}
+        }
+    }
+
+    if (cellHighestValue <= 0.0f)
+        return false;
+
+    float minDist = FLT_MAX;
+    GridPos targetCell = highestValueCells[0];
+
+    for (const GridPos& cell : highestValueCells)
+    {
+        const Vec2 cellWorldPos{ terrain->get_world_position(cell.row, cell.col).x, terrain->get_world_position(cell.row, cell.col).z };
+		const Vec2 enemyWorldPos{ enemy->get_position().x , enemy->get_position().z };
+
+        const float dist = Vec2::Distance(cellWorldPos, enemyWorldPos);
+        if (dist < minDist)
+        {
+            minDist = dist;
+            targetCell = cell;
+        }
+    }
+
+	enemy->path_to(terrain->get_world_position(targetCell.row, targetCell.col));
+
+    return true; 
 }

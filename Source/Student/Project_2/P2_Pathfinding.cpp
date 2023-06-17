@@ -48,8 +48,8 @@ bool AStarPather::initialize()
     Callback cb = std::bind(&AStarPather::UpdateAllNodeNeighbours, this);
     Messenger::listen_for_message(Messages::MAP_CHANGE, cb);
 
-    Callback floydcb = std::bind(&AStarPather::FloydPathReconstruction, this);
-    Messenger::listen_for_message(Messages::MAP_CHANGE, floydcb);
+    //Callback floydcb = std::bind(&AStarPather::FloydPathReconstruction, this);
+    //Messenger::listen_for_message(Messages::MAP_CHANGE, floydcb);
 
     return true; // return false if any errors actually occur, to stop engine initialization
 }
