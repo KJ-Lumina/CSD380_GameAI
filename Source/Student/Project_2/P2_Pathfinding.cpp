@@ -159,7 +159,8 @@ PathResult AStarPather::compute_path(PathRequest &request)
                 node = node->parent;
             }
 
-            request.path.emplace_back(request.goal);
+            const GridPos goal = terrain->get_grid_position(request.goal);
+            request.path.emplace_back(terrain->get_world_position(goal));
 
         	if (request.settings.rubberBanding && request.settings.smoothing)
 		    {

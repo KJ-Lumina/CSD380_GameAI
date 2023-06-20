@@ -111,7 +111,7 @@ bool isCellinFOV(const int targetRow, const int targetCol, const Vec2& inViewVec
 	const float RadAngle = (inFOVAngle / 2.0f) * (PI / 180);
 
     //Change Visibility to false if its 180 degree behind the agent
-	if (cosAngle >= cosf(RadAngle)){
+	if (cosAngle < cosf(RadAngle)){
         return false;
     }
 
@@ -376,7 +376,7 @@ void analyze_agent_vision(MapLayer<float> &layer, const Agent *agent)
             const GridPos agentGridPos = terrain->get_grid_position(agent->get_position());
             const Vec2 viewVector = Vec2{ agent->get_forward_vector().x, agent->get_forward_vector().z };
             const Vec2 agentPos = Vec2{ agent->get_position().x, agent->get_position().z };
-			const bool isVisible = isCellinFOV(i, j, viewVector, agentPos, 180);
+			const bool isVisible = isCellinFOV(i, j, -viewVector, agentPos, 190);
 
             if (isVisible && is_clear_path(agentGridPos.row, agentGridPos.col, i, j))
             {
@@ -541,7 +541,7 @@ void enemy_field_of_view(MapLayer<float> &layer, float fovAngle, float closeDist
             const Vec2 cellPos = Vec2{ terrain->get_world_position(i, j).x, terrain->get_world_position(i, j).z };
             const Vec2 agentPos = Vec2{ enemy->get_position().x, enemy->get_position().z };
 
-            if (Vec2::Distance(agentPos, cellPos) < closeDistance)
+            if (GridPosDistance(agentGridPos, { i, j }) < closeDistance)
             {
 				const bool isClearPath = is_clear_path(agentGridPos.row,agentGridPos.col, i, j);
 
@@ -554,7 +554,7 @@ void enemy_field_of_view(MapLayer<float> &layer, float fovAngle, float closeDist
                 const Vec2 viewVector = Vec2{ enemy->get_forward_vector().x, enemy->get_forward_vector().z };
 
                 const bool isClearPath = is_clear_path(agentGridPos.row, agentGridPos.col, i, j);
-                const bool isVisible = isCellinFOV(i, j, viewVector, agentPos, fovAngle);
+                const bool isVisible = isCellinFOV(i, j, -viewVector, agentPos, fovAngle);
 
                 if (isVisible && isClearPath)
                     layer.set_value(i, j, occupancyValue);
