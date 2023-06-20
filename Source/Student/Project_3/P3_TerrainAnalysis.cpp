@@ -101,7 +101,7 @@ float ApplyDecayFromNeighbors(int row, int col, float decay, MapLayer<float>& la
 bool isCellinFOV(const int targetRow, const int targetCol, const Vec2& inViewVector, const Vec2& inAgentPos, const float inFOVAngle)
 {
     const Vec2 cellPos = Vec2{ terrain->get_world_position(GridPos{ targetRow,targetCol}).x, terrain->get_world_position(GridPos{ targetRow,targetCol }).z };
-    Vec2 cellToAgent = inAgentPos - cellPos;
+    Vec2 cellToAgent = cellPos - inAgentPos;
     cellToAgent.Normalize();
 
     const float dotProduct = inViewVector.Dot(cellToAgent);
@@ -374,9 +374,10 @@ void analyze_agent_vision(MapLayer<float> &layer, const Agent *agent)
                 continue;
 
             const GridPos agentGridPos = terrain->get_grid_position(agent->get_position());
-            const Vec2 viewVector = Vec2{ agent->get_forward_vector().x, agent->get_forward_vector().z };
+        	Vec2 viewVector = Vec2{ agent->get_forward_vector().x, agent->get_forward_vector().z };
+            viewVector.Normalize();
             const Vec2 agentPos = Vec2{ agent->get_position().x, agent->get_position().z };
-			const bool isVisible = isCellinFOV(i, j, -viewVector, agentPos, 190);
+			const bool isVisible = isCellinFOV(i, j, viewVector, agentPos, 190);
 
             if (isVisible && is_clear_path(agentGridPos.row, agentGridPos.col, i, j))
             {
@@ -551,10 +552,12 @@ void enemy_field_of_view(MapLayer<float> &layer, float fovAngle, float closeDist
 			else
             {
                 
-                const Vec2 viewVector = Vec2{ enemy->get_forward_vector().x, enemy->get_forward_vector().z };
+				Vec2 viewVector = Vec2{ enemy->get_forward_vector().x, enemy->get_forward_vector().z };
+				viewVector.Normalize();
+
 
                 const bool isClearPath = is_clear_path(agentGridPos.row, agentGridPos.col, i, j);
-                const bool isVisible = isCellinFOV(i, j, -viewVector, agentPos, fovAngle);
+                const bool isVisible = isCellinFOV(i, j, viewVector, agentPos, fovAngle);
 
                 if (isVisible && isClearPath)
                     layer.set_value(i, j, occupancyValue);
